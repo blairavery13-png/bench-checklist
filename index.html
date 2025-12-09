@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bench Checklist</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b1120">
+
+<style>
+*{box-sizing:border-box}
+html,body{
+  margin:0;padding:0;
+  background:#0b1120;
+  color:#e5e7eb;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:18px;
+}
+body{display:flex;justify-content:center;padding:16px}
+.app{
+  width:100%;
+  max-width:920px;
+  background:#111827;
+  border-radius:16px;
+  padding:20px;
+  border:1px solid #1f2937;
+}
+h1{margin:0 0 4px}
+.sub{color:#9ca3af;font-size:.95rem;margin-bottom:16px}
+
+.controls{
+  display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap
+}
+.controls button{
+  padding:10px 18px;
+  border-radius:999px;
+  border:1px solid #4b5563;
+  background:#020617;
+  color:#e5e7eb;
+  font-size:.9rem;
+}
+
+.section-title{
+  margin:20px 0 10px;
+  font-size:1.15rem;
+  font-weight:600;
+  border-bottom:1px solid #1f2937;
+  padding-bottom:6px;
+}
+
+.field-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:12px;
+  margin-bottom:18px;
+}
+.field input{
+  width:100%;
+  padding:12px;
+  margin-top:4px;
+  border-radius:8px;
+  background:#020617;
+  border:1px solid #4b5563;
+  color:#e5e7eb;
+}
+
+.question{
+  background:#020617;
+  border:1px solid #1f2937;
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:18px;
+}
+.q-text{margin-bottom:12px}
+
+.answers{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.answers input{display:none}
+.answers label{
+  padding:14px 0;
+  text-align:center;
+  border-radius:999px;
+  border:1px solid #4b5563;
+  background:#111827;
+  cursor:pointer;
+  user-select:none;
+}
+.answers input:checked + label.yes{background:#16a34a}
+.answers input:checked + label.no{background:#b91c1c}
+.answers input:checked + label.na{background:#374151}
+
+.notes textarea{
+  width:100%;
+  min-height:70px;
+  margin-top:12px;
+  padding:10px;
+  border-radius:8px;
+  background:#020617;
+  border:1px solid #4b5563;
+  color:#e5e7eb;
+}
+
+@media print{
+  body{background:#fff;color:#000;padding:0}
+  .app{background:#fff;color:#000;border:none}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<h1>Bench Checklist</h1>
+<div class="sub">One checklist per room</div>
+
+<div class="controls">
+  <button type="button" onclick="saveJSON()">Save JSON</button>
+  <button type="button" onclick="loadJSON()">Load JSON</button>
+  <button type="button" onclick="window.print()">Print / Save PDF</button>
+</div>
+
+<input id="fileInput" type="file" accept=".json" style="display:none">
+
+<div class="section-title">Job Details</div>
+<div class="field-row">
+  <input id="filledBy" placeholder="Checklist filled by">
+  <input id="jobNumber" placeholder="Job number">
+  <input id="room" placeholder="Room">
+</div>
+
+<div class="section-title">Checklist</div>
+
+<script>
+var questions=[
+ "Colour caps supplied?",
+ "Sizes checked (kicks / panels / bulkheads)?",
+ "LEDs supplied & tested?",
+ "Handles / sharknose rails installed?",
+ "Cleats supplied (bulkheads / overheads)?",
+ "Doors & drawers defect free?",
+ "Aluminium angle cut and supplied?",
+ "Cutlery tray installed (if required)?",
+ "Bins installed (if required)?",
+ "Finished ends correct and fitted?",
+ "Appliance panels supplied?",
+ "Shadowline / scribes installed?",
+ "Soft-close mechanisms working?",
+ "Special / custom hardware installed?"
+];
+</script>
+
+<div id="qWrap"></div>
+
+<div class="controls">
+  <button type="button" onclick="saveJSON()">Save JSON</button>
+  <button type="button" onclick="loadJSON()">Load JSON</button>
+  <button type="button" onclick="window.print()">Print / Save PDF</button>
+</div>
+
+</div>
+
+<script>
+var wrap=document.getElementById("qWrap");
+for(var i=0;i<questions.length;i++){
+  wrap.innerHTML+=
+   '<div class="question">'+
+   '<div class="q-text">'+(i+1)+'. '+questions[i]+'</div>'+
+   '<div class="answers">'+
+   '<input type="radio" name="q'+i+'" id="q'+i+'y" value="Yes"><label for="q'+i+'y" class="yes">Yes</label>'+
+   '<input type="radio" name="q'+i+'" id="q'+i+'n" value="No"><label for="q'+i+'n" class="no">No</label>'+
+   '<input type="radio" name="q'+i+'" id="q'+i+'a" value="N/A"><label for="q'+i+'a" class="na">N/A</label>'+
+   '</div><div class="notes"><textarea></textarea></div></div>';
+}
+
+function saveJSON(){
+  var data={
+    filledBy:filledBy.value,
+    jobNumber:jobNumber.value,
+    room:room.value,
+    answers:[]
+  };
+  var qs=document.getElementsByClassName("question");
+  for(var i=0;i<qs.length;i++){
+    var q=qs[i];
+    var sel=q.querySelector("input[type=radio]:checked");
+    data.answers.push({
+      answer:sel?sel.value:null,
+      notes:q.querySelector("textarea").value
+    });
+  }
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+  a.download=(jobNumber.value||"job")+"_"+(room.value||"room")+".json";
+  a.click();
+}
+
+function loadJSON(){
+  fileInput.value="";
+  fileInput.click();
+}
+
+fileInput.onchange=function(e){
+  var r=new FileReader();
+  r.onload=function(){
+    var d=JSON.parse(r.result);
+    filledBy.value=d.filledBy||"";
+    jobNumber.value=d.jobNumber||"";
+    room.value=d.room||"";
+    var qs=document.getElementsByClassName("question");
+    for(var i=0;i<qs.length;i++){
+      var a=d.answers[i];
+      if(!a)continue;
+      var q=qs[i];
+      var radios=q.querySelectorAll("input[type=radio]");
+      for(var j=0;j<radios.length;j++){radios[j].checked=false}
+      if(a.answer){
+        q.querySelector('input[value="'+a.answer+'"]').checked=true;
+      }
+      q.querySelector("textarea").value=a.notes||"";
+    }
+  };
+  r.readAsText(e.target.files[0]);
+};
+
+/* Register service worker */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+</body>
+</html>
