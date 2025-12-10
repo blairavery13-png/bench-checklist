@@ -1,237 +1,564 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Bench Checklist</title>
+  <meta charset="utf-8">
+  <title>Bench Checklist</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b1120">
+  <!-- PWA: link to manifest + theme colour -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b1120">
 
-<style>
-*{box-sizing:border-box}
-html,body{
-  margin:0;padding:0;
-  background:#0b1120;
-  color:#e5e7eb;
-  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-  font-size:18px;
-}
-body{display:flex;justify-content:center;padding:16px}
-.app{
-  width:100%;
-  max-width:920px;
-  background:#111827;
-  border-radius:16px;
-  padding:20px;
-  border:1px solid #1f2937;
-}
-h1{margin:0 0 4px}
-.sub{color:#9ca3af;font-size:.95rem;margin-bottom:16px}
+  <style>
+    * { box-sizing: border-box; }
 
-.controls{
-  display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap
-}
-.controls button{
-  padding:10px 18px;
-  border-radius:999px;
-  border:1px solid #4b5563;
-  background:#020617;
-  color:#e5e7eb;
-  font-size:.9rem;
-}
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #0b1120;
+      color: #e5e7eb;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 18px;
+    }
 
-.section-title{
-  margin:20px 0 10px;
-  font-size:1.15rem;
-  font-weight:600;
-  border-bottom:1px solid #1f2937;
-  padding-bottom:6px;
-}
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+    }
 
-.field-row{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:12px;
-  margin-bottom:18px;
-}
-.field input{
-  width:100%;
-  padding:12px;
-  margin-top:4px;
-  border-radius:8px;
-  background:#020617;
-  border:1px solid #4b5563;
-  color:#e5e7eb;
-}
+    .app {
+      width: 100%;
+      max-width: 920px;
+      background: #111827;
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid #1f2937;
+    }
 
-.question{
-  background:#020617;
-  border:1px solid #1f2937;
-  border-radius:14px;
-  padding:14px;
-  margin-bottom:18px;
-}
-.q-text{margin-bottom:12px}
+    h1 { margin: 0 0 4px; }
+    .sub {
+      color: #9ca3af;
+      font-size: 0.95rem;
+      margin-bottom: 16px;
+    }
 
-.answers{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-}
-.answers input{display:none}
-.answers label{
-  padding:14px 0;
-  text-align:center;
-  border-radius:999px;
-  border:1px solid #4b5563;
-  background:#111827;
-  cursor:pointer;
-  user-select:none;
-}
-.answers input:checked + label.yes{background:#16a34a}
-.answers input:checked + label.no{background:#b91c1c}
-.answers input:checked + label.na{background:#374151}
+    .section-title {
+      margin: 20px 0 10px;
+      font-size: 1.15rem;
+      font-weight: 600;
+      border-bottom: 1px solid #1f2937;
+      padding-bottom: 6px;
+    }
 
-.notes textarea{
-  width:100%;
-  min-height:70px;
-  margin-top:12px;
-  padding:10px;
-  border-radius:8px;
-  background:#020617;
-  border:1px solid #4b5563;
-  color:#e5e7eb;
-}
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
 
-@media print{
-  body{background:#fff;color:#000;padding:0}
-  .app{background:#fff;color:#000;border:none}
-}
-</style>
+    .field label {
+      font-size: 0.9rem;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      margin-top: 4px;
+      border-radius: 8px;
+      background: #020617;
+      border: 1px solid #4b5563;
+      color: #e5e7eb;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .controls button {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .question {
+      background: #020617;
+      border: 1px solid #1f2937;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+
+    .q-text {
+      margin-bottom: 12px;
+      font-size: 1.05rem;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    /* hide radios */
+    .answers input[type="radio"] {
+      display: none;
+    }
+
+    /* labels as buttons */
+    .answers label {
+      padding: 14px 0;
+      text-align: center;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: #111827;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* checked states */
+    .answers input[type="radio"]:checked + label.yes {
+      background: #16a34a;
+      border-color: #16a34a;
+    }
+    .answers input[type="radio"]:checked + label.no {
+      background: #b91c1c;
+      border-color: #b91c1c;
+    }
+    .answers input[type="radio"]:checked + label.na {
+      background: #374151;
+      border-color: #9ca3af;
+    }
+
+    .notes {
+      margin-top: 12px;
+    }
+
+    .notes textarea {
+      width: 100%;
+      min-height: 70px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #020617;
+      border: 1px solid #4b5563;
+      color: #e5e7eb;
+      font-size: 0.95rem;
+      resize: vertical;
+    }
+
+    /* Simple print-friendly tweaks */
+    @media print {
+      body {
+        background: #ffffff;
+        color: #000000;
+        padding: 0;
+      }
+      .app {
+        max-width: 100%;
+        border-radius: 0;
+        border: none;
+        background: #ffffff;
+        color: #000000;
+      }
+      .question {
+        background: #ffffff;
+        border-color: #d1d5db;
+      }
+      .answers label {
+        border-color: #9ca3af;
+        background: #f9fafb;
+        color: #111827;
+      }
+      .answers input[type="radio"]:checked + label.yes {
+        background: #bbf7d0;
+      }
+      .answers input[type="radio"]:checked + label.no {
+        background: #fecaca;
+      }
+      .answers input[type="radio"]:checked + label.na {
+        background: #e5e7eb;
+      }
+    }
+  </style>
 </head>
 
 <body>
-<div class="app">
+  <div class="app">
+    <h1>Bench Checklist</h1>
+    <div class="sub">One checklist per room – save JSON to continue later</div>
 
-<h1>Bench Checklist</h1>
-<div class="sub">One checklist per room</div>
+    <!-- TOP CONTROLS -->
+    <div class="controls">
+      <button type="button" onclick="saveJSON()">Save JSON</button>
+      <button type="button" onclick="loadJSON()">Load JSON</button>
+      <button type="button" onclick="printPDF()">Print / Save PDF</button>
+      <input type="file" id="fileInput" accept=".json,application/json" style="display:none">
+    </div>
 
-<div class="controls">
-  <button type="button" onclick="saveJSON()">Save JSON</button>
-  <button type="button" onclick="loadJSON()">Load JSON</button>
-  <button type="button" onclick="window.print()">Print / Save PDF</button>
-</div>
+    <!-- JOB DETAILS -->
+    <div class="section-title">Job Details</div>
+    <div class="field-row">
+      <div class="field">
+        <label for="filledBy">Checklist filled by</label>
+        <input id="filledBy" placeholder="Name (e.g. Blair)">
+      </div>
+      <div class="field">
+        <label for="jobNumber">Job number</label>
+        <input id="jobNumber" placeholder="JB8093">
+      </div>
+      <div class="field">
+        <label for="room">Room</label>
+        <input id="room" placeholder="Kitchen / Laundry / Vanity">
+      </div>
+    </div>
 
-<input id="fileInput" type="file" accept=".json" style="display:none">
+    <div class="section-title">Checklist</div>
 
-<div class="section-title">Job Details</div>
-<div class="field-row">
-  <input id="filledBy" placeholder="Checklist filled by">
-  <input id="jobNumber" placeholder="Job number">
-  <input id="room" placeholder="Room">
-</div>
+    <!-- STATIC, NUMBERED QUESTIONS -->
+    <!-- 1 -->
+    <div class="question">
+      <div class="q-text">1. Colour caps supplied?</div>
+      <div class="answers">
+        <input type="radio" name="q0" id="q0y" value="Yes">
+        <label for="q0y" class="yes">Yes</label>
 
-<div class="section-title">Checklist</div>
+        <input type="radio" name="q0" id="q0n" value="No">
+        <label for="q0n" class="no">No</label>
 
-<script>
-var questions=[
- "Colour caps supplied?",
- "Sizes checked (kicks / panels / bulkheads)?",
- "LEDs supplied & tested?",
- "Handles / sharknose rails installed?",
- "Cleats supplied (bulkheads / overheads)?",
- "Doors & drawers defect free?",
- "Aluminium angle cut and supplied?",
- "Cutlery tray installed (if required)?",
- "Bins installed (if required)?",
- "Finished ends correct and fitted?",
- "Appliance panels supplied?",
- "Shadowline / scribes installed?",
- "Soft-close mechanisms working?",
- "Special / custom hardware installed?"
-];
-</script>
+        <input type="radio" name="q0" id="q0a" value="N/A">
+        <label for="q0a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
 
-<div id="qWrap"></div>
+    <!-- 2 -->
+    <div class="question">
+      <div class="q-text">2. Sizes checked (kicks / panels / bulkheads)?</div>
+      <div class="answers">
+        <input type="radio" name="q1" id="q1y" value="Yes">
+        <label for="q1y" class="yes">Yes</label>
 
-<div class="controls">
-  <button type="button" onclick="saveJSON()">Save JSON</button>
-  <button type="button" onclick="loadJSON()">Load JSON</button>
-  <button type="button" onclick="window.print()">Print / Save PDF</button>
-</div>
+        <input type="radio" name="q1" id="q1n" value="No">
+        <label for="q1n" class="no">No</label>
 
-</div>
+        <input type="radio" name="q1" id="q1a" value="N/A">
+        <label for="q1a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
 
-<script>
-var wrap=document.getElementById("qWrap");
-for(var i=0;i<questions.length;i++){
-  wrap.innerHTML+=
-   '<div class="question">'+
-   '<div class="q-text">'+(i+1)+'. '+questions[i]+'</div>'+
-   '<div class="answers">'+
-   '<input type="radio" name="q'+i+'" id="q'+i+'y" value="Yes"><label for="q'+i+'y" class="yes">Yes</label>'+
-   '<input type="radio" name="q'+i+'" id="q'+i+'n" value="No"><label for="q'+i+'n" class="no">No</label>'+
-   '<input type="radio" name="q'+i+'" id="q'+i+'a" value="N/A"><label for="q'+i+'a" class="na">N/A</label>'+
-   '</div><div class="notes"><textarea></textarea></div></div>';
-}
+    <!-- 3 -->
+    <div class="question">
+      <div class="q-text">3. LEDs supplied & tested?</div>
+      <div class="answers">
+        <input type="radio" name="q2" id="q2y" value="Yes">
+        <label for="q2y" class="yes">Yes</label>
 
-function saveJSON(){
-  var data={
-    filledBy:filledBy.value,
-    jobNumber:jobNumber.value,
-    room:room.value,
-    answers:[]
-  };
-  var qs=document.getElementsByClassName("question");
-  for(var i=0;i<qs.length;i++){
-    var q=qs[i];
-    var sel=q.querySelector("input[type=radio]:checked");
-    data.answers.push({
-      answer:sel?sel.value:null,
-      notes:q.querySelector("textarea").value
-    });
-  }
-  var a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
-  a.download=(jobNumber.value||"job")+"_"+(room.value||"room")+".json";
-  a.click();
-}
+        <input type="radio" name="q2" id="q2n" value="No">
+        <label for="q2n" class="no">No</label>
 
-function loadJSON(){
-  fileInput.value="";
-  fileInput.click();
-}
+        <input type="radio" name="q2" id="q2a" value="N/A">
+        <label for="q2a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
 
-fileInput.onchange=function(e){
-  var r=new FileReader();
-  r.onload=function(){
-    var d=JSON.parse(r.result);
-    filledBy.value=d.filledBy||"";
-    jobNumber.value=d.jobNumber||"";
-    room.value=d.room||"";
-    var qs=document.getElementsByClassName("question");
-    for(var i=0;i<qs.length;i++){
-      var a=d.answers[i];
-      if(!a)continue;
-      var q=qs[i];
-      var radios=q.querySelectorAll("input[type=radio]");
-      for(var j=0;j<radios.length;j++){radios[j].checked=false}
-      if(a.answer){
-        q.querySelector('input[value="'+a.answer+'"]').checked=true;
-      }
-      q.querySelector("textarea").value=a.notes||"";
+    <!-- 4 -->
+    <div class="question">
+      <div class="q-text">4. Handles / sharknose rails installed?</div>
+      <div class="answers">
+        <input type="radio" name="q3" id="q3y" value="Yes">
+        <label for="q3y" class="yes">Yes</label>
+
+        <input type="radio" name="q3" id="q3n" value="No">
+        <label for="q3n" class="no">No</label>
+
+        <input type="radio" name="q3" id="q3a" value="N/A">
+        <label for="q3a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
+
+    <!-- 5 -->
+    <div class="question">
+      <div class="q-text">5. Cleats supplied (bulkheads / overheads)?</div>
+      <div class="answers">
+        <input type="radio" name="q4" id="q4y" value="Yes">
+        <label for="q4y" class="yes">Yes</label>
+
+        <input type="radio" name="q4" id="q4n" value="No">
+        <label for="q4n" class="no">No</label>
+
+        <input type="radio" name="q4" id="q4a" value="N/A">
+        <label for="q4a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
+
+    <!-- 6 -->
+    <div class="question">
+      <div class="q-text">6. Doors & drawers defect free?</div>
+      <div class="answers">
+        <input type="radio" name="q5" id="q5y" value="Yes">
+        <label for="q5y" class="yes">Yes</label>
+
+        <input type="radio" name="q5" id="q5n" value="No">
+        <label for="q5n" class="no">No</label>
+
+        <input type="radio" name="q5" id="q5a" value="N/A">
+        <label for="q5a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
+
+    <!-- 7 -->
+    <div class="question">
+      <div class="q-text">7. Aluminium angle cut and supplied?</div>
+      <div class="answers">
+        <input type="radio" name="q6" id="q6y" value="Yes">
+        <label for="q6y" class="yes">Yes</label>
+
+        <input type="radio" name="q6" id="q6n" value="No">
+        <label for="q6n" class="no">No</label>
+
+        <input type="radio" name="q6" id="q6a" value="N/A">
+        <label for="q6a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
+
+    <!-- 8 -->
+    <div class="question">
+      <div class="q-text">8. Cutlery tray installed (if required)?</div>
+      <div class="answers">
+        <input type="radio" name="q7" id="q7y" value="Yes">
+        <label for="q7y" class="yes">Yes</label>
+
+        <input type="radio" name="q7" id="q7n" value="No">
+        <label for="q7n" class="no">No</label>
+
+        <input type="radio" name="q7" id="q7a" value="N/A">
+        <label for="q7a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
+
+    <!-- 9 -->
+    <div class="question">
+      <div class="q-text">9. Bins installed (if required)?</div>
+      <div class="answers">
+        <input type="radio" name="q8" id="q8y" value="Yes">
+        <label for="q8y" class="yes">Yes</label>
+
+        <input type="radio" name="q8" id="q8n" value="No">
+        <label for="q8n" class="no">No</label>
+
+        <input type="radio" name="q8" id="q8a" value="N/A">
+        <label for="q8a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
+
+    <!-- 10 -->
+    <div class="question">
+      <div class="q-text">10. Finished ends correct and fitted?</div>
+      <div class="answers">
+        <input type="radio" name="q9" id="q9y" value="Yes">
+        <label for="q9y" class="yes">Yes</label>
+
+        <input type="radio" name="q9" id="q9n" value="No">
+        <label for="q9n" class="no">No</label>
+
+        <input type="radio" name="q9" id="q9a" value="N/A">
+        <label for="q9a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
+
+    <!-- 11 -->
+    <div class="question">
+      <div class="q-text">11. Appliance panels supplied?</div>
+      <div class="answers">
+        <input type="radio" name="q10" id="q10y" value="Yes">
+        <label for="q10y" class="yes">Yes</label>
+
+        <input type="radio" name="q10" id="q10n" value="No">
+        <label for="q10n" class="no">No</label>
+
+        <input type="radio" name="q10" id="q10a" value="N/A">
+        <label for="q10a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
+
+    <!-- 12 -->
+    <div class="question">
+      <div class="q-text">12. Shadowline / scribes installed?</div>
+      <div class="answers">
+        <input type="radio" name="q11" id="q11y" value="Yes">
+        <label for="q11y" class="yes">Yes</label>
+
+        <input type="radio" name="q11" id="q11n" value="No">
+        <label for="q11n" class="no">No</label>
+
+        <input type="radio" name="q11" id="q11a" value="N/A">
+        <label for="q11a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
+
+    <!-- 13 -->
+    <div class="question">
+      <div class="q-text">13. Soft-close mechanisms working?</div>
+      <div class="answers">
+        <input type="radio" name="q12" id="q12y" value="Yes">
+        <label for="q12y" class="yes">Yes</label>
+
+        <input type="radio" name="q12" id="q12n" value="No">
+        <label for="q12n" class="no">No</label>
+
+        <input type="radio" name="q12" id="q12a" value="N/A">
+        <label for="q12a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
+
+    <!-- 14 -->
+    <div class="question">
+      <div class="q-text">14. Special / custom hardware installed?</div>
+      <div class="answers">
+        <input type="radio" name="q13" id="q13y" value="Yes">
+        <label for="q13y" class="yes">Yes</label>
+
+        <input type="radio" name="q13" id="q13n" value="No">
+        <label for="q13n" class="no">No</label>
+
+        <input type="radio" name="q13" id="q13a" value="N/A">
+        <label for="q13a" class="na">N/A</label>
+      </div>
+      <div class="notes"><textarea></textarea></div>
+    </div>
+
+    <!-- BOTTOM CONTROLS -->
+    <div class="controls">
+      <button type="button" onclick="saveJSON()">Save JSON</button>
+      <button type="button" onclick="loadJSON()">Load JSON</button>
+      <button type="button" onclick="printPDF()">Print / Save PDF</button>
+    </div>
+  </div>
+
+  <script>
+    const filledByInput  = document.getElementById('filledBy');
+    const jobNumberInput = document.getElementById('jobNumber');
+    const roomInput      = document.getElementById('room');
+    const fileInput      = document.getElementById('fileInput');
+
+    function safeName(str) {
+      return String(str || '').replace(/[^a-z0-9_-]/gi, '');
     }
-  };
-  r.readAsText(e.target.files[0]);
-};
 
-/* Register service worker */
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("service-worker.js");
-}
-</script>
+    function saveJSON() {
+      const data = {
+        filledBy: filledByInput.value || '',
+        jobNumber: jobNumberInput.value || '',
+        room: roomInput.value || '',
+        answers: []
+      };
+
+      document.querySelectorAll('.question').forEach(function(qDiv) {
+        const selected = qDiv.querySelector('input[type="radio"]:checked');
+        const notesEl  = qDiv.querySelector('textarea');
+        data.answers.push({
+          answer: selected ? selected.value : null,
+          notes:  notesEl ? (notesEl.value || '') : ''
+        });
+      });
+
+      const fileName =
+        safeName(data.jobNumber || 'Job') + '_' +
+        safeName(data.room || 'Room') + '_' +
+        safeName(data.filledBy || 'User') + '.json';
+
+      try {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } catch (e) {
+        alert('Unable to save JSON on this device.');
+      }
+    }
+
+    function loadJSON() {
+      fileInput.value = '';
+      fileInput.click();
+    }
+
+    fileInput.addEventListener('change', function(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = JSON.parse(evt.target.result || '{}');
+
+          filledByInput.value  = data.filledBy  || '';
+          jobNumberInput.value = data.jobNumber || '';
+          roomInput.value      = data.room      || '';
+
+          const qDivs = document.querySelectorAll('.question');
+          qDivs.forEach(function(qDiv, index) {
+            const entry = (data.answers && data.answers[index]) || null;
+            if (!entry) return;
+
+            // clear radios
+            qDiv.querySelectorAll('input[type="radio"]').forEach(function(radio) {
+              radio.checked = false;
+            });
+
+            if (entry.answer) {
+              const match = qDiv.querySelector('input[type="radio"][value="' + entry.answer + '"]');
+              if (match) match.checked = true;
+            }
+
+            const notesEl = qDiv.querySelector('textarea');
+            if (notesEl) notesEl.value = entry.notes || '';
+          });
+        } catch (err) {
+          alert('Invalid JSON file.');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    function printPDF() {
+      window.print();
+    }
+
+    // Expose functions on window (extra safety)
+    window.saveJSON = saveJSON;
+    window.loadJSON = loadJSON;
+    window.printPDF = printPDF;
+
+    // PWA: register service worker if available
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
 </body>
 </html>
