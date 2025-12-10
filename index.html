@@ -13,6 +13,8 @@
 
   <style>
     * { box-sizing: border-box; }
+ 
+
 
     html, body {
       margin: 0;
@@ -190,6 +192,24 @@
         background: #e5e7eb;
       }
     }
+    /* --- Tablet input fix (Samsung / Android) --- */
+@media (pointer: coarse) {
+  .field input {
+    background: #020617 !important;
+    color: #e5e7eb !important;
+    padding: 16px 14px;
+    font-size: 19px;
+    border: 2px solid #4b5563;
+    min-height: 54px;
+    border-radius: 10px;
+  }
+
+  .field label {
+    font-size: 1rem;
+    color: #d1d5db;
+  }
+}
+
   </style>
 </head>
 
@@ -562,3 +582,4 @@
   </script>
 </body>
 </html>
+
