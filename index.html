@@ -1,585 +1,259 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Bench Checklist</title>
+<meta charset="UTF-8" />
+<title>Bench Checklist</title>
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- PWA: link to manifest + theme colour -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0b1120">
-
-  <style>
-    * { box-sizing: border-box; }
- 
-
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: #0b1120;
-      color: #e5e7eb;
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-      font-size: 18px;
-    }
-
-    body {
-      display: flex;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    .app {
-      width: 100%;
-      max-width: 920px;
-      background: #111827;
-      border-radius: 16px;
-      padding: 20px;
-      border: 1px solid #1f2937;
-    }
-
-    h1 { margin: 0 0 4px; }
-    .sub {
-      color: #9ca3af;
-      font-size: 0.95rem;
-      margin-bottom: 16px;
-    }
-
-    .section-title {
-      margin: 20px 0 10px;
-      font-size: 1.15rem;
-      font-weight: 600;
-      border-bottom: 1px solid #1f2937;
-      padding-bottom: 6px;
-    }
-
-    .field-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-
-    .field label {
-      font-size: 0.9rem;
-    }
-
-    .field input {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      margin-top: 4px;
-      border-radius: 8px;
-      background: #020617;
-      border: 1px solid #4b5563;
-      color: #e5e7eb;
-    }
-
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-
-    .controls button {
-      padding: 8px 16px;
-      border-radius: 999px;
-      border: 1px solid #4b5563;
-      background: #020617;
-      color: #e5e7eb;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    .question {
-      background: #020617;
-      border: 1px solid #1f2937;
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 18px;
-    }
-
-    .q-text {
-      margin-bottom: 12px;
-      font-size: 1.05rem;
-    }
-
-    .answers {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    /* hide radios */
-    .answers input[type="radio"] {
-      display: none;
-    }
-
-    /* labels as buttons */
-    .answers label {
-      padding: 14px 0;
-      text-align: center;
-      border-radius: 999px;
-      border: 1px solid #4b5563;
-      background: #111827;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    /* checked states */
-    .answers input[type="radio"]:checked + label.yes {
-      background: #16a34a;
-      border-color: #16a34a;
-    }
-    .answers input[type="radio"]:checked + label.no {
-      background: #b91c1c;
-      border-color: #b91c1c;
-    }
-    .answers input[type="radio"]:checked + label.na {
-      background: #374151;
-      border-color: #9ca3af;
-    }
-
-    .notes {
-      margin-top: 12px;
-    }
-
-    .notes textarea {
-      width: 100%;
-      min-height: 70px;
-      padding: 10px;
-      border-radius: 8px;
-      background: #020617;
-      border: 1px solid #4b5563;
-      color: #e5e7eb;
-      font-size: 0.95rem;
-      resize: vertical;
-    }
-
-    /* Simple print-friendly tweaks */
-    @media print {
-      body {
-        background: #ffffff;
-        color: #000000;
-        padding: 0;
-      }
-      .app {
-        max-width: 100%;
-        border-radius: 0;
-        border: none;
-        background: #ffffff;
-        color: #000000;
-      }
-      .question {
-        background: #ffffff;
-        border-color: #d1d5db;
-      }
-      .answers label {
-        border-color: #9ca3af;
-        background: #f9fafb;
-        color: #111827;
-      }
-      .answers input[type="radio"]:checked + label.yes {
-        background: #bbf7d0;
-      }
-      .answers input[type="radio"]:checked + label.no {
-        background: #fecaca;
-      }
-      .answers input[type="radio"]:checked + label.na {
-        background: #e5e7eb;
-      }
-    }
-    /* --- Tablet input fix (Samsung / Android) --- */
-@media (pointer: coarse) {
-  .field input {
-    background: #020617 !important;
-    color: #e5e7eb !important;
-    padding: 16px 14px;
-    font-size: 19px;
-    border: 2px solid #4b5563;
-    min-height: 54px;
-    border-radius: 10px;
-  }
-
-  .field label {
-    font-size: 1rem;
-    color: #d1d5db;
-  }
+<style>
+:root {
+  --bg: #0b1120;
+  --panel: #111827;
+  --field: #020617;
+  --border: #4b5563;
+  --text: #e5e7eb;
 }
 
-  </style>
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+.wrapper {
+  max-width: 900px;
+  margin: auto;
+  padding: 16px;
+}
+
+h1 {
+  margin: 0 0 8px 0;
+}
+
+.section {
+  background: var(--panel);
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 14px;
+  font-size: 1.05rem;
+  border-radius: 10px;
+  background: var(--field);
+  border: 2px solid var(--border);
+  color: var(--text);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+button {
+  background: #020617;
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.question {
+  background: var(--field);
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.q-text {
+  font-size: 1.05rem;
+  margin-bottom: 12px;
+}
+
+.answers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.answers input { display: none; }
+
+.answers label {
+  padding: 14px;
+  text-align: center;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  cursor: pointer;
+}
+
+.answers input:checked + label.yes { background:#16a34a; border-color:#16a34a; }
+.answers input:checked + label.no { background:#b91c1c; border-color:#b91c1c; }
+.answers input:checked + label.na { background:#374151; border-color:#9ca3af; }
+
+textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 10px;
+  background: var(--field);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+/* PRINT */
+@media print {
+  body { background:#fff; color:#000; }
+  .section, .question { background:#fff; border-color:#d1d5db; }
+  button { display:none; }
+}
+</style>
 </head>
 
 <body>
-  <div class="app">
-    <h1>Bench Checklist</h1>
-    <div class="sub">One checklist per room – save JSON to continue later</div>
+<div class="wrapper">
 
-    <!-- TOP CONTROLS -->
-    <div class="controls">
-      <button type="button" onclick="saveJSON()">Save JSON</button>
-      <button type="button" onclick="loadJSON()">Load JSON</button>
-      <button type="button" onclick="printPDF()">Print / Save PDF</button>
-      <input type="file" id="fileInput" accept=".json,application/json" style="display:none">
+<h1>Bench Checklist</h1>
+
+<div class="controls">
+  <button onclick="saveJSON()">Save JSON</button>
+  <button onclick="loadJSON()">Load JSON</button>
+  <button onclick="window.print()">Print / PDF</button>
+  <input type="file" id="fileInput" accept=".json" hidden>
+</div>
+
+<div class="section">
+  <div class="grid">
+    <div>
+      <label>Checklist filled by</label>
+      <input type="text" id="filledBy">
     </div>
-
-    <!-- JOB DETAILS -->
-    <div class="section-title">Job Details</div>
-    <div class="field-row">
-      <div class="field">
-        <label for="filledBy">Checklist filled by</label>
-        <input id="filledBy" placeholder="Name (e.g. Blair)">
-      </div>
-      <div class="field">
-        <label for="jobNumber">Job number</label>
-        <input id="jobNumber" placeholder="JB8093">
-      </div>
-      <div class="field">
-        <label for="room">Room</label>
-        <input id="room" placeholder="Kitchen / Laundry / Vanity">
-      </div>
+    <div>
+      <label>Job number</label>
+      <input type="text" id="jobNumber">
     </div>
-
-    <div class="section-title">Checklist</div>
-
-    <!-- STATIC, NUMBERED QUESTIONS -->
-    <!-- 1 -->
-    <div class="question">
-      <div class="q-text">1. Colour caps supplied?</div>
-      <div class="answers">
-        <input type="radio" name="q0" id="q0y" value="Yes">
-        <label for="q0y" class="yes">Yes</label>
-
-        <input type="radio" name="q0" id="q0n" value="No">
-        <label for="q0n" class="no">No</label>
-
-        <input type="radio" name="q0" id="q0a" value="N/A">
-        <label for="q0a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- 2 -->
-    <div class="question">
-      <div class="q-text">2. Sizes checked (kicks / panels / bulkheads)?</div>
-      <div class="answers">
-        <input type="radio" name="q1" id="q1y" value="Yes">
-        <label for="q1y" class="yes">Yes</label>
-
-        <input type="radio" name="q1" id="q1n" value="No">
-        <label for="q1n" class="no">No</label>
-
-        <input type="radio" name="q1" id="q1a" value="N/A">
-        <label for="q1a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- 3 -->
-    <div class="question">
-      <div class="q-text">3. LEDs supplied & tested?</div>
-      <div class="answers">
-        <input type="radio" name="q2" id="q2y" value="Yes">
-        <label for="q2y" class="yes">Yes</label>
-
-        <input type="radio" name="q2" id="q2n" value="No">
-        <label for="q2n" class="no">No</label>
-
-        <input type="radio" name="q2" id="q2a" value="N/A">
-        <label for="q2a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- 4 -->
-    <div class="question">
-      <div class="q-text">4. Handles / sharknose rails installed?</div>
-      <div class="answers">
-        <input type="radio" name="q3" id="q3y" value="Yes">
-        <label for="q3y" class="yes">Yes</label>
-
-        <input type="radio" name="q3" id="q3n" value="No">
-        <label for="q3n" class="no">No</label>
-
-        <input type="radio" name="q3" id="q3a" value="N/A">
-        <label for="q3a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- 5 -->
-    <div class="question">
-      <div class="q-text">5. Cleats supplied (bulkheads / overheads)?</div>
-      <div class="answers">
-        <input type="radio" name="q4" id="q4y" value="Yes">
-        <label for="q4y" class="yes">Yes</label>
-
-        <input type="radio" name="q4" id="q4n" value="No">
-        <label for="q4n" class="no">No</label>
-
-        <input type="radio" name="q4" id="q4a" value="N/A">
-        <label for="q4a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- 6 -->
-    <div class="question">
-      <div class="q-text">6. Doors & drawers defect free?</div>
-      <div class="answers">
-        <input type="radio" name="q5" id="q5y" value="Yes">
-        <label for="q5y" class="yes">Yes</label>
-
-        <input type="radio" name="q5" id="q5n" value="No">
-        <label for="q5n" class="no">No</label>
-
-        <input type="radio" name="q5" id="q5a" value="N/A">
-        <label for="q5a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- 7 -->
-    <div class="question">
-      <div class="q-text">7. Aluminium angle cut and supplied?</div>
-      <div class="answers">
-        <input type="radio" name="q6" id="q6y" value="Yes">
-        <label for="q6y" class="yes">Yes</label>
-
-        <input type="radio" name="q6" id="q6n" value="No">
-        <label for="q6n" class="no">No</label>
-
-        <input type="radio" name="q6" id="q6a" value="N/A">
-        <label for="q6a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- 8 -->
-    <div class="question">
-      <div class="q-text">8. Cutlery tray installed (if required)?</div>
-      <div class="answers">
-        <input type="radio" name="q7" id="q7y" value="Yes">
-        <label for="q7y" class="yes">Yes</label>
-
-        <input type="radio" name="q7" id="q7n" value="No">
-        <label for="q7n" class="no">No</label>
-
-        <input type="radio" name="q7" id="q7a" value="N/A">
-        <label for="q7a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- 9 -->
-    <div class="question">
-      <div class="q-text">9. Bins installed (if required)?</div>
-      <div class="answers">
-        <input type="radio" name="q8" id="q8y" value="Yes">
-        <label for="q8y" class="yes">Yes</label>
-
-        <input type="radio" name="q8" id="q8n" value="No">
-        <label for="q8n" class="no">No</label>
-
-        <input type="radio" name="q8" id="q8a" value="N/A">
-        <label for="q8a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- 10 -->
-    <div class="question">
-      <div class="q-text">10. Finished ends correct and fitted?</div>
-      <div class="answers">
-        <input type="radio" name="q9" id="q9y" value="Yes">
-        <label for="q9y" class="yes">Yes</label>
-
-        <input type="radio" name="q9" id="q9n" value="No">
-        <label for="q9n" class="no">No</label>
-
-        <input type="radio" name="q9" id="q9a" value="N/A">
-        <label for="q9a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- 11 -->
-    <div class="question">
-      <div class="q-text">11. Appliance panels supplied?</div>
-      <div class="answers">
-        <input type="radio" name="q10" id="q10y" value="Yes">
-        <label for="q10y" class="yes">Yes</label>
-
-        <input type="radio" name="q10" id="q10n" value="No">
-        <label for="q10n" class="no">No</label>
-
-        <input type="radio" name="q10" id="q10a" value="N/A">
-        <label for="q10a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- 12 -->
-    <div class="question">
-      <div class="q-text">12. Shadowline / scribes installed?</div>
-      <div class="answers">
-        <input type="radio" name="q11" id="q11y" value="Yes">
-        <label for="q11y" class="yes">Yes</label>
-
-        <input type="radio" name="q11" id="q11n" value="No">
-        <label for="q11n" class="no">No</label>
-
-        <input type="radio" name="q11" id="q11a" value="N/A">
-        <label for="q11a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- 13 -->
-    <div class="question">
-      <div class="q-text">13. Soft-close mechanisms working?</div>
-      <div class="answers">
-        <input type="radio" name="q12" id="q12y" value="Yes">
-        <label for="q12y" class="yes">Yes</label>
-
-        <input type="radio" name="q12" id="q12n" value="No">
-        <label for="q12n" class="no">No</label>
-
-        <input type="radio" name="q12" id="q12a" value="N/A">
-        <label for="q12a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- 14 -->
-    <div class="question">
-      <div class="q-text">14. Special / custom hardware installed?</div>
-      <div class="answers">
-        <input type="radio" name="q13" id="q13y" value="Yes">
-        <label for="q13y" class="yes">Yes</label>
-
-        <input type="radio" name="q13" id="q13n" value="No">
-        <label for="q13n" class="no">No</label>
-
-        <input type="radio" name="q13" id="q13a" value="N/A">
-        <label for="q13a" class="na">N/A</label>
-      </div>
-      <div class="notes"><textarea></textarea></div>
-    </div>
-
-    <!-- BOTTOM CONTROLS -->
-    <div class="controls">
-      <button type="button" onclick="saveJSON()">Save JSON</button>
-      <button type="button" onclick="loadJSON()">Load JSON</button>
-      <button type="button" onclick="printPDF()">Print / Save PDF</button>
+    <div>
+      <label>Room</label>
+      <input type="text" id="room">
     </div>
   </div>
+</div>
 
-  <script>
-    const filledByInput  = document.getElementById('filledBy');
-    const jobNumberInput = document.getElementById('jobNumber');
-    const roomInput      = document.getElementById('room');
-    const fileInput      = document.getElementById('fileInput');
+<div id="questions"></div>
 
-    function safeName(str) {
-      return String(str || '').replace(/[^a-z0-9_-]/gi, '');
-    }
+<div class="controls">
+  <button onclick="saveJSON()">Save JSON</button>
+  <button onclick="loadJSON()">Load JSON</button>
+  <button onclick="window.print()">Print / PDF</button>
+</div>
 
-    function saveJSON() {
-      const data = {
-        filledBy: filledByInput.value || '',
-        jobNumber: jobNumberInput.value || '',
-        room: roomInput.value || '',
-        answers: []
-      };
+</div>
 
-      document.querySelectorAll('.question').forEach(function(qDiv) {
-        const selected = qDiv.querySelector('input[type="radio"]:checked');
-        const notesEl  = qDiv.querySelector('textarea');
-        data.answers.push({
-          answer: selected ? selected.value : null,
-          notes:  notesEl ? (notesEl.value || '') : ''
-        });
-      });
+<script>
+const questionsText = [
+ "Colour caps supplied?",
+ "Sizes checked (kicks / panels / bulkheads)?",
+ "LEDs supplied & tested?",
+ "Handles / sharknose rails installed?",
+ "Cleats supplied (bulkheads / overheads)?",
+ "Doors & drawers defect free?",
+ "Aluminium angle supplied?",
+ "Cutlery tray installed?",
+ "Bins installed?",
+ "Finished ends correct?",
+ "Appliance panels supplied?",
+ "Shadowline / scribes installed?",
+ "Soft close working?",
+ "Special / custom hardware installed?"
+];
 
-      const fileName =
-        safeName(data.jobNumber || 'Job') + '_' +
-        safeName(data.room || 'Room') + '_' +
-        safeName(data.filledBy || 'User') + '.json';
+const qWrap = document.getElementById("questions");
 
-      try {
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      } catch (e) {
-        alert('Unable to save JSON on this device.');
-      }
-    }
+questionsText.forEach((t,i)=>{
+  qWrap.insertAdjacentHTML("beforeend",`
+  <div class="question">
+    <div class="q-text">${i+1}. ${t}</div>
+    <div class="answers">
+      <input id="q${i}y" type="radio" name="q${i}" value="Yes"><label class="yes" for="q${i}y">Yes</label>
+      <input id="q${i}n" type="radio" name="q${i}" value="No"><label class="no" for="q${i}n">No</label>
+      <input id="q${i}a" type="radio" name="q${i}" value="N/A"><label class="na" for="q${i}a">N/A</label>
+    </div>
+    <textarea placeholder="Notes..."></textarea>
+  </div>`);
+});
 
-    function loadJSON() {
-      fileInput.value = '';
-      fileInput.click();
-    }
+function saveJSON() {
+  const data = {
+    filledBy: filledBy.value,
+    jobNumber: jobNumber.value,
+    room: room.value,
+    answers: []
+  };
 
-    fileInput.addEventListener('change', function(e) {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const data = JSON.parse(evt.target.result || '{}');
-
-          filledByInput.value  = data.filledBy  || '';
-          jobNumberInput.value = data.jobNumber || '';
-          roomInput.value      = data.room      || '';
-
-          const qDivs = document.querySelectorAll('.question');
-          qDivs.forEach(function(qDiv, index) {
-            const entry = (data.answers && data.answers[index]) || null;
-            if (!entry) return;
-
-            // clear radios
-            qDiv.querySelectorAll('input[type="radio"]').forEach(function(radio) {
-              radio.checked = false;
-            });
-
-            if (entry.answer) {
-              const match = qDiv.querySelector('input[type="radio"][value="' + entry.answer + '"]');
-              if (match) match.checked = true;
-            }
-
-            const notesEl = qDiv.querySelector('textarea');
-            if (notesEl) notesEl.value = entry.notes || '';
-          });
-        } catch (err) {
-          alert('Invalid JSON file.');
-        }
-      };
-      reader.readAsText(file);
+  document.querySelectorAll(".question").forEach(q=>{
+    const sel = q.querySelector("input:checked");
+    data.answers.push({
+      answer: sel ? sel.value : "",
+      notes: q.querySelector("textarea").value
     });
+  });
 
-    function printPDF() {
-      window.print();
-    }
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${jobNumber.value || "job"}_${room.value || "room"}.json`;
+  a.click();
+}
 
-    // Expose functions on window (extra safety)
-    window.saveJSON = saveJSON;
-    window.loadJSON = loadJSON;
-    window.printPDF = printPDF;
+function loadJSON() {
+  fileInput.click();
+}
 
-    // PWA: register service worker if available
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js');
-    }
-  </script>
+fileInput.onchange = e => {
+  const r = new FileReader();
+  r.onload = () => {
+    const d = JSON.parse(r.result);
+    filledBy.value = d.filledBy||"";
+    jobNumber.value = d.jobNumber||"";
+    room.value = d.room||"";
+    document.querySelectorAll(".question").forEach((q,i)=>{
+      if(!d.answers[i]) return;
+      const a=d.answers[i];
+      if(a.answer){
+        q.querySelector(`input[value="${a.answer}"]`).checked=true;
+      }
+      q.querySelector("textarea").value = a.notes||"";
+    });
+  };
+  r.readAsText(e.target.files[0]);
+};
+</script>
+
 </body>
 </html>
-
