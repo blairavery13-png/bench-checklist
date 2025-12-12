@@ -8,38 +8,133 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b5ed7">
 
-<script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
 <style>
-body{margin:0;font-family:system-ui;background:#f6f8fb}
-.wrap{max-width:1000px;margin:auto;padding:16px 16px 120px}
-.card{background:#fff;border:1px solid #dbe2f0;border-radius:14px;padding:14px;margin-bottom:12px}
-h1{margin:0 0 10px;color:#0b2d6a}
-label{font-size:.9rem;color:#64748b}
-input,select,textarea{width:100%;padding:14px;border-radius:12px;border:1px solid #dbe2f0;font-size:1.05rem}
+:root{
+  --bg:#ffffff;
+  --card:#ffffff;
+  --border:#dbe2f0;
+  --text:#000000;
+  --blue:#0b5ed7;
+}
+.dark{
+  --bg:#0f172a;
+  --card:#111827;
+  --border:#334155;
+  --text:#ffffff;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+.wrap{
+  max-width:1000px;
+  margin:auto;
+  padding:16px 16px 140px;
+}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:14px;
+}
+h1{margin:0 0 10px;font-weight:800}
+label{font-weight:700}
+input,select,textarea{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  font-size:1.05rem;
+  font-weight:700;
+}
 textarea{min-height:80px}
-.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-.btn{background:#0b5ed7;color:#fff;border:none;border-radius:999px;padding:14px 18px;font-weight:800}
-.btn.secondary{background:#fff;color:#0b2d6a;border:1px solid #cfe0ff}
-.bottom{position:fixed;left:0;right:0;bottom:0;background:#f6f8fb;border-top:1px solid #dbe2f0;padding:10px}
-.bottomInner{max-width:1000px;margin:auto;display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
-.q{border:1px solid #dbe2f0;border-radius:12px;padding:12px;margin-top:10px}
-.q.missing{outline:3px solid rgba(245,158,11,.35)}
-.choice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+}
+.btn{
+  background:var(--blue);
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  padding:14px 20px;
+  font-weight:800;
+}
+.btn.secondary{
+  background:transparent;
+  color:var(--text);
+  border:2px solid var(--blue);
+}
+.bottom{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  background:var(--bg);
+  border-top:1px solid var(--border);
+  padding:10px;
+}
+.bottomInner{
+  max-width:1000px;
+  margin:auto;
+  display:flex;
+  gap:10px;
+  justify-content:space-between;
+  flex-wrap:wrap;
+}
+.q{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  margin-top:10px;
+  font-weight:800;
+}
+.choice{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:8px;
+}
 .choice input{display:none}
-.choice label{display:block;text-align:center;padding:14px;border-radius:999px;border:2px solid #cfe0ff;font-weight:800;cursor:pointer}
-.choice input:checked+label.y{background:#e7f6ed;border-color:#bfe7cc}
-.choice input:checked+label.n{background:#ffecec;border-color:#ffc6c6}
-.photoGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:10px}
-.thumb{border:1px solid #dbe2f0;border-radius:12px;overflow:hidden}
-.thumb img{width:100%;height:120px;object-fit:cover}
+.choice label{
+  display:block;
+  text-align:center;
+  padding:14px;
+  border-radius:999px;
+  border:2px solid var(--border);
+  cursor:pointer;
+}
+.choice input:checked+label.y{background:#dcfce7}
+.choice input:checked+label.n{background:#fee2e2}
+.photoGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:10px;
+  margin-top:10px;
+}
+.thumb img{
+  width:100%;
+  height:120px;
+  object-fit:cover;
+  border-radius:10px;
+}
+.toggle{
+  cursor:pointer;
+  font-weight:800;
+  text-decoration:underline;
+}
 </style>
 </head>
 
 <body>
 <div class="wrap">
 <h1>Installer Daily Report</h1>
+<div class="toggle" onclick="toggleMode()">Light / Dark</div>
 
 <div class="card">
 <div class="row">
@@ -47,7 +142,7 @@ textarea{min-height:80px}
 <div>
 <label>Installer</label>
 <select id="installer">
-<option value="">Select…</option>
+<option value="">Select</option>
 <option>Installer 1</option>
 <option>Installer 2</option>
 <option>Installer 3</option>
@@ -56,6 +151,12 @@ textarea{min-height:80px}
 </div>
 <div><label>Job Number</label><input id="job" value="JB"></div>
 </div>
+
+<div style="margin-top:10px">
+<label>Installed Rooms</label>
+<input id="rooms" placeholder="Kitchen, Laundry, Vanities">
+</div>
+
 <div style="margin-top:10px">
 <label>Notes</label>
 <textarea id="notes"></textarea>
@@ -63,19 +164,14 @@ textarea{min-height:80px}
 </div>
 
 <div class="card">
-<b>Photos</b>
-<div style="margin-top:8px">
 <label class="btn secondary">Add Pre Photos<input type="file" id="pre" multiple hidden></label>
 <div id="preGrid" class="photoGrid"></div>
-</div>
-<div style="margin-top:8px">
-<label class="btn secondary">Add Issue Photos<input type="file" id="issue" multiple hidden></label>
+
+<label class="btn secondary" style="margin-top:8px">Add Issue Photos<input type="file" id="issue" multiple hidden></label>
 <div id="issueGrid" class="photoGrid"></div>
-</div>
-<div style="margin-top:8px">
-<label class="btn secondary">Add Final Photos<input type="file" id="final" multiple hidden></label>
+
+<label class="btn secondary" style="margin-top:8px">Add Final Photos<input type="file" id="final" multiple hidden></label>
 <div id="finalGrid" class="photoGrid"></div>
-</div>
 </div>
 
 <div class="card">
@@ -86,77 +182,95 @@ textarea{min-height:80px}
 
 <div class="bottom">
 <div class="bottomInner">
-<div id="status">Ready</div>
-<div>
-<button class="btn secondary" onclick="exportData(false)">Export</button>
-<button class="btn" onclick="exportData(true)">Finish & Export</button>
-</div>
+<div></div>
+<button class="btn" onclick="exportPDF()">Finish & Export PDF</button>
 </div>
 </div>
 
 <script>
 const QUESTIONS=[
-{id:"damage",t:"Any cabinet damage?",c:"Yes"},
-{id:"missing",t:"Any hardware missing?",c:"Yes"},
-{id:"legs",t:"Plastic legs incorrect?",c:"Yes"},
-{id:"access",t:"Access issues on site?",c:"Yes"},
-{id:"dims",t:"Dimensions incorrect?",c:"Yes"},
-{id:"handles",t:"Handles correct?",c:"No"},
-{id:"bumpons",t:"Bump-ons fitted?",c:"No"}
+"Any pre-existing damage?",
+"Any cabinetry missing?",
+"Any cabinet damage?",
+"Any hardware missing?",
+"Handles fitted / correct?",
+"Bump-ons fitted?",
+"Plastic legs incorrect?",
+"Dimensions incorrect?",
+"Any site issues?",
+"Was installation delayed?",
+"Access issues on site?"
 ];
 
-const state={a:{},p:{pre:[],issue:[],final:[]}};
+const state={a:{}};
 document.getElementById("date").value=new Date().toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});
 
 const job=document.getElementById("job");
-job.addEventListener("input",e=>{
+job.oninput=e=>{
 let v=e.target.value||"";
 if(v.length>=2)v="JB"+v.slice(2);
 e.target.value=v.toUpperCase();
-});
+};
 
 const checklist=document.getElementById("checklist");
-QUESTIONS.forEach((q,i)=>{
+QUESTIONS.forEach((t,i)=>{
 const d=document.createElement("div");
 d.className="q";
-d.id=q.id;
-d.innerHTML=`${i+1}. ${q.t}
+d.innerHTML=`${i+1}. ${t}
 <div class="choice">
-<input type="radio" name="${q.id}" value="Yes" id="${q.id}y"><label class="y" for="${q.id}y">Yes</label>
-<input type="radio" name="${q.id}" value="No" id="${q.id}n"><label class="n" for="${q.id}n">No</label>
+<input type="radio" name="q${i}" value="Yes" id="y${i}">
+<label class="y" for="y${i}">Yes</label>
+<input type="radio" name="q${i}" value="No" id="n${i}">
+<label class="n" for="n${i}">No</label>
 </div>
 <textarea placeholder="Comment" style="display:none"></textarea>`;
 checklist.appendChild(d);
 
-d.querySelectorAll("input").forEach(r=>{
+const radios=d.querySelectorAll("input");
+const ta=d.querySelector("textarea");
+radios.forEach(r=>{
 r.onchange=()=>{
-state.a[q.id]={v:r.value,c:""};
-const t=d.querySelector("textarea");
-t.style.display=(r.value===q.c)?"block":"none";
+state.a[i]={v:r.value,c:""};
+ta.style.display=r.value==="Yes"?"block":"none";
 };
 });
-d.querySelector("textarea").oninput=e=>state.a[q.id].c=e.target.value;
+ta.oninput=e=>state.a[i].c=e.target.value;
 });
 
 ["pre","issue","final"].forEach(k=>{
 document.getElementById(k).onchange=e=>{
+const grid=document.getElementById(k+"Grid");
 Array.from(e.target.files).forEach(f=>{
 const img=document.createElement("img");
 img.src=URL.createObjectURL(f);
-document.getElementById(k+"Grid").appendChild(Object.assign(document.createElement("div"),{className:"thumb"})).appendChild(img);
+grid.appendChild(img);
 });
 };
 });
 
-async function exportData(clear){
-const zip=new JSZip();
-zip.file("data.json",JSON.stringify(state,null,2));
-const blob=await zip.generateAsync({type:"blob"});
-const a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download=`${job.value}_${new Date().toISOString().slice(0,10)}.zip`;
-a.click();
-if(clear)location.reload();
+function toggleMode(){
+document.body.classList.toggle("dark");
+}
+
+function exportPDF(){
+const {jsPDF}=window.jspdf;
+const doc=new jsPDF();
+let y=10;
+
+doc.setFont("helvetica","bold");
+doc.text(`Job: ${job.value}`,10,y);y+=8;
+doc.text(`Rooms: ${rooms.value}`,10,y);y+=8;
+doc.text(`Installer: ${installer.value}`,10,y);y+=8;
+doc.text(`Date: ${date.value}`,10,y);y+=10;
+
+doc.text("Checklist",10,y);y+=8;
+Object.values(state.a).forEach((q,i)=>{
+doc.text(`${i+1}. ${q.v}`,10,y);y+=6;
+if(q.c){doc.text(`- ${q.c}`,14,y);y+=6;}
+});
+
+doc.save(`${job.value} – ${rooms.value} – ${installer.value} – ${date.value}.pdf`);
+location.reload();
 }
 </script>
 </body>
