@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Installer Daily Checklist</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b1120" />
+
+  <!-- External libs (cached after first load; also listed in service-worker.js) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#0b1120; --panel:#111827; --field:#020617; --border:#4b5563; --muted:#9ca3af;
+      --text:#e5e7eb; --ok:#16a34a; --bad:#b91c1c; --na:#374151; --warn:#f59e0b;
+      --shadow: 0 10px 24px rgba(0,0,0,.25);
+      --radius: 16px;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ margin:0; padding:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,sans-serif; }
+    .wrap{ max-width:980px; margin:0 auto; padding:16px; }
+    .topbar{ display:flex; align-items:flex-start; gap:12px; justify-content:space-between; flex-wrap:wrap; margin-bottom:14px; }
+    h1{ margin:0; font-size:1.35rem; letter-spacing:.2px; }
+    .sub{ color:var(--muted); font-size:.95rem; margin-top:4px; }
+
+    .card{
+      background:var(--panel);
+      border:1px solid #1f2937;
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow: var(--shadow);
+      margin-bottom:14px;
+    }
+
+    .row{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; }
+    label{ display:block; font-size:.92rem; color:#d1d5db; margin-bottom:6px; }
+    input[type="text"], select, textarea{
+      width:100%;
+      background:var(--field);
+      color:var(--text);
+      border:2px solid var(--border);
+      border-radius:12px;
+      padding:14px 14px;
+      font-size:1.05rem;
+      outline:none;
+    }
+    textarea{ min-height:80px; resize:vertical; font-size:1rem; }
+
+    .pillbar{ display:flex; gap:10px; flex-wrap:wrap; }
+    .btn{
+      border:2px solid var(--border);
+      background:var(--field);
+      color:var(--text);
+      border-radius:999px;
+      padding:10px 16px;
+      cursor:pointer;
+      font-size:.95rem;
+      user-select:none;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{ border-color:#334155; background:#0f172a; }
+    .btn.warn{ border-color: rgba(245,158,11,.55); }
+    .btn.ok{ border-color: rgba(22,163,74,.6); }
+    .btn.bad{ border-color: rgba(185,28,28,.6); }
+    .btn[disabled]{ opacity:.55; cursor:not-allowed; }
+
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      background:#0f172a; border:1px solid #243044;
+      padding:6px 10px; border-radius:999px; color:#cbd5e1; font-size:.9rem;
+    }
+    .req{ color: var(--warn); font-weight:700; }
+
+    details{
+      border:1px solid #1f2937;
+      border-radius:var(--radius);
+      overflow:hidden;
+      background:rgba(2,6,23,.35);
+      margin-bottom:12px;
+    }
+    summary{
+      list-style:none;
+      cursor:pointer;
+      padding:14px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      user-select:none;
+      font-weight:650;
+    }
+    summary::-webkit-details-marker{ display:none; }
+    .sum-right{ display:flex; gap:8px; align-items:center; color:var(--muted); font-weight:500; }
+    .sum-dot{ width:10px; height:10px; border-radius:99px; background: #334155; border:1px solid #475569; }
+    .sum-dot.ok{ background: var(--ok); border-color: rgba(22,163,74,.65); }
+    .sum-dot.bad{ background: var(--bad); border-color: rgba(185,28,28,.65); }
+    .sum-dot.warn{ background: var(--warn); border-color: rgba(245,158,11,.65); }
+
+    .qwrap{ padding: 0 14px 14px 14px; }
+    .q{
+      background: var(--field);
+      border:1px solid #1f2937;
+      border-radius:14px;
+      padding:14px;
+      margin-top:12px;
+    }
+    .q.missing{ outline: 3px solid rgba(245,158,11,.55); }
+    .qhead{ display:flex; gap:10px; align-items:flex-start; justify-content:space-between; }
+    .qtext{ font-size:1.02rem; line-height:1.25rem; }
+    .qid{ color:var(--muted); font-size:.9rem; white-space:nowrap; }
+
+    .answers{
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+    .answers input{ display:none; }
+    .answers label{
+      margin:0;
+      display:block;
+      text-align:center;
+      padding:14px 0;
+      border-radius:999px;
+      border:2px solid var(--border);
+      cursor:pointer;
+      user-select:none;
+      font-size:1rem;
+    }
+    /* Checked states */
+    .answers input:checked + label.yes{ background: var(--ok); border-color: var(--ok); }
+    .answers input:checked + label.no { background: var(--bad); border-color: var(--bad); }
+
+    .follow{
+      margin-top:12px;
+      display:none;
+      gap:10px;
+      grid-template-columns: 1fr;
+    }
+    .follow.show{ display:grid; }
+
+    .benchRow{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap:10px;
+      align-items:end;
+    }
+    .benchPills{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .benchPills input{ display:none; }
+    .benchPills label{
+      margin:0;
+      padding:10px 14px;
+      border-radius:999px;
+      border:2px solid var(--border);
+      cursor:pointer;
+      user-select:none;
+      text-align:center;
+      background:rgba(2,6,23,.6);
+    }
+    .benchPills input:checked + label{
+      border-color:#e2e8f0;
+      box-shadow: 0 0 0 3px rgba(226,232,240,.18);
+    }
+
+    .photoBar{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .thumbs{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap:10px;
+    }
+    .thumb{
+      background: rgba(2,6,23,.55);
+      border:1px solid #1f2937;
+      border-radius:14px;
+      overflow:hidden;
+      position:relative;
+    }
+    .thumb img{ width:100%; height:120px; object-fit:cover; display:block; }
+    .thumb .meta{
+      padding:8px 10px;
+      font-size:.85rem;
+      color:#cbd5e1;
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:center;
+    }
+    .thumb button{
+      position:absolute;
+      top:8px; right:8px;
+      border:none;
+      background: rgba(0,0,0,.55);
+      color:#fff;
+      border-radius:999px;
+      width:34px; height:34px;
+      cursor:pointer;
+    }
+    .noteTiny{ color:var(--muted); font-size:.9rem; margin-top:6px; }
+    .divider{ height:1px; background:#1f2937; margin:14px 0; }
+
+    /* Tablet touch ergonomics */
+    @media (pointer: coarse) {
+      input[type="text"], select, textarea { padding:16px 14px; font-size:1.1rem; }
+      .answers label{ padding:16px 0; font-size:1.05rem; }
+      .btn{ padding:12px 18px; font-size:1rem; }
+      h1{ font-size:1.5rem; }
+    }
+
+    /* Print view (human readable) */
+    @media print{
+      body{ background:#fff; color:#000; }
+      .btn, .pillbar, .photoInputs, details > summary .sum-right{ display:none !important; }
+      .card{ box-shadow:none; border-color:#d1d5db; background:#fff; }
+      details{ border-color:#d1d5db; background:#fff; }
+      .q{ background:#fff; border-color:#d1d5db; }
+      input[type="text"], select, textarea{ border-color:#d1d5db; background:#fff; color:#000; }
+      .thumb img{ height:90px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>Installer Daily Checklist</h1>
+        <div class="sub">Daily job record with photos + issues — export one ZIP (JSON + PDF + photos)</div>
+      </div>
+      <div class="pillbar">
+        <button class="btn primary" id="btnExportZip">Export ZIP</button>
+        <button class="btn" id="btnPrint">Print / PDF (device)</button>
+        <button class="btn" id="btnReset">Reset Form</button>
+      </div>
+    </div>
+
+    <div class="card" id="cardHeader">
+      <div class="row">
+        <div>
+          <label>Date (auto)</label>
+          <input type="text" id="dateStr" readonly>
+        </div>
+        <div>
+          <label>Installer</label>
+          <select id="installer">
+            <option value="">Select…</option>
+            <option>Installer 1</option>
+            <option>Installer 2</option>
+            <option>Installer 3</option>
+            <option>Installer 4</option>
+          </select>
+        </div>
+        <div>
+          <label>Job Number <span class="req">*</span></label>
+          <input type="text" id="jobNumber" value="JB" inputmode="text" autocomplete="off" spellcheck="false">
+          <div class="noteTiny">Tip: job numbers always start with <b>JB</b> — already prefilled.</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
+        <label>Rooms worked on today (optional)</label>
+        <input type="text" id="rooms" placeholder="e.g. Kitchen + Laundry + Vanities" />
+      </div>
+
+      <div style="margin-top:12px;">
+        <label>Daily notes (optional)</label>
+        <textarea id="dailyNotes" placeholder="Anything worth noting for the office…"></textarea>
+      </div>
+
+      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <span class="badge">Required to complete: <b>Pre photos</b> + <b>Final photos</b> + <b>all questions answered</b></span>
+        <span class="badge">Bench colours: <b>Red / Blue / Green / Purple</b></span>
+      </div>
+    </div>
+
+    <!-- PRE PHOTOS -->
+    <div class="card" id="cardPrePhotos">
+      <div class="photoBar">
+        <div>
+          <div style="font-weight:700;">Pre-install photos <span class="req">*</span></div>
+          <div class="noteTiny">Take clear photos of walls/floors/access before installation.</div>
+        </div>
+        <div class="photoInputs">
+          <label class="btn ok" for="prePhotoInput" style="display:inline-block;">Add Pre Photos</label>
+          <input id="prePhotoInput" type="file" accept="image/*" capture="environment" multiple hidden>
+        </div>
+      </div>
+
+      <div id="preThumbs" class="thumbs"></div>
+      <div id="preReqMsg" class="noteTiny" style="margin-top:10px; display:none;">
+        <span class="req">Pre-install photos are required to complete.</span>
+      </div>
+    </div>
+
+    <!-- CHECKLIST -->
+    <div class="card" id="cardChecklist">
+      <div style="font-weight:800; margin-bottom:6px;">Daily checklist</div>
+      <div class="noteTiny">All questions are Yes/No. Some answers automatically require comments and/or bench colour.</div>
+      <div id="checklistHost"></div>
+    </div>
+
+    <!-- FINAL PHOTOS -->
+    <div class="card" id="cardFinalPhotos">
+      <div class="photoBar">
+        <div>
+          <div style="font-weight:700;">Final photos <span class="req">*</span></div>
+          <div class="noteTiny">End-of-day photos of installed work (even if not complete).</div>
+        </div>
+        <div class="photoInputs">
+          <label class="btn ok" for="finalPhotoInput" style="display:inline-block;">Add Final Photos</label>
+          <input id="finalPhotoInput" type="file" accept="image/*" capture="environment" multiple hidden>
+        </div>
+      </div>
+
+      <div id="finalThumbs" class="thumbs"></div>
+      <div id="finalReqMsg" class="noteTiny" style="margin-top:10px; display:none;">
+        <span class="req">Final photos are required to complete.</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="pillbar">
+        <button class="btn primary" id="btnDailyComplete">Daily Complete (Validate + Export ZIP)</button>
+        <span id="completeMsg" class="noteTiny"></span>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ---------- Helpers ----------
+  const $ = (id) => document.getElementById(id);
+  const isoDate = () => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  };
+  const humanDate = () => {
+    const d = new Date();
+    const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+    return d.toLocaleDateString(undefined, opts);
+  };
+  const safeName = (s) => String(s||'').trim().replace(/[^a-z0-9._-]+/gi,'_').replace(/_+/g,'_').replace(/^_+|_+$/g,'');
+  const nowStamp = () => {
+    const d = new Date();
+    const hh = String(d.getHours()).padStart(2,'0');
+    const mm = String(d.getMinutes()).padStart(2,'0');
+    const ss = String(d.getSeconds()).padStart(2,'0');
+    return `${isoDate()}_${hh}${mm}${ss}`;
+  };
+
+  // ---------- Core state ----------
+  const state = {
+    meta: {
+      dateISO: isoDate(),
+      dateHuman: humanDate(),
+      installer: "",
+      jobNumber: "JB",
+      rooms: "",
+      dailyNotes: ""
+    },
+    prePhotos: /** @type {Array<{name:string, blob:Blob, mime:string, ts:string}>} */ ([]),
+    finalPhotos: /** @type {Array<{name:string, blob:Blob, mime:string, ts:string}>} */ ([]),
+    answers: /** @type {Record<string, {value:"Yes"|"No"|null, comment:string, benchColour:"Red"|"Blue"|"Green"|"Purple"|""}>} */ ({})
+  };
+
+  // ---------- Checklist schema (IDs never change) ----------
+  // commentOn: "Yes" means comment required if Yes; "No" means comment required if No; null means no conditional comment.
+  // benchOn: same rule but for bench colour selection.
+  const BENCH_COLOURS = ["Red","Blue","Green","Purple"];
+
+  const SECTIONS = [
+    {
+      id: "site_access",
+      title: "Site & Access",
+      items: [
+        { id:"pre_damage_visible", text:"Is there any pre-existing wall/floor/ceiling damage visible before installation?", commentOn:"Yes" },
+        { id:"access_issue", text:"Were there any access issues getting cabinetry into the home/rooms (stairs, tight turns, door widths)?", commentOn:"Yes" },
+        { id:"design_too_large_for_access", text:"Was any cabinetry too large for access/delivery into position due to design?", commentOn:"Yes" },
+      ]
+    },
+    {
+      id: "plans_measures",
+      title: "Plans, Measurements & Fit",
+      items: [
+        { id:"dims_incorrect", text:"Were any dimensions incorrect on site (does not match plan / checkmeasure issue)?", commentOn:"Yes" },
+        { id:"walls_out_of_plumb", text:"Were walls/floors significantly out of plumb/level causing fit issues?", commentOn:"Yes" },
+        { id:"scribe_bulkhead_issue", text:"Were bulkheads/scribes/kickboards incorrect length or required unexpected changes?", commentOn:"Yes" },
+      ]
+    },
+    {
+      id: "manufacture_quality",
+      title: "Cabinet Construction & Quality (Factory)",
+      items: [
+        { id:"cabinet_fault", text:"Were any cabinets constructed incorrectly (carcase, drilling, sizing, edging, alignment)?", commentOn:"Yes", benchOn:"Yes" },
+        { id:"chips_damage", text:"Were there chips/scratches/damage to cabinetry found before/during install?", commentOn:"Yes", benchOn:"Yes" },
+        { id:"legs_wrong_position", text:"Were plastic legs fitted incorrectly or in the wrong position?", commentOn:"Yes", benchOn:"Yes" },
+      ]
+    },
+    {
+      id: "hardware_components",
+      title: "Hardware & Components",
+      items: [
+        { id:"hardware_missing", text:"Was any hardware missing (hinges, runners, brackets, pull-outs, fixings, etc.)?", commentOn:"Yes" },
+        { id:"hardware_wrong", text:"Was any hardware supplied incorrect (wrong size/type/finish)?", commentOn:"Yes" },
+        { id:"lighting_issue", text:"If lighting/components were supplied, were there any issues fitting/working?", commentOn:"Yes" },
+      ]
+    },
+    {
+      id: "finish_items",
+      title: "Finish Items",
+      items: [
+        { id:"handles_fitted", text:"Were handles fitted correctly where applicable?", commentOn:"No" },
+        { id:"bumpons_fitted", text:"Were door cushions/bump-ons fitted correctly where applicable?", commentOn:"No" },
+        { id:"adjustments_complete", text:"Were doors/drawers adjusted and operating correctly for today’s scope?", commentOn:"No" },
+      ]
+    },
+    {
+      id: "install_incidents",
+      title: "Installation Issues / Incidents",
+      items: [
+        { id:"builder_damage_claim_risk", text:"Was there any situation today likely to result in a builder damage claim or dispute?", commentOn:"Yes" },
+        { id:"on_site_damage_caused", text:"Did any damage occur during installation today (any cause)?", commentOn:"Yes" },
+        { id:"return_visit_required", text:"Is a return visit required due to issues/materials/missing items?", commentOn:"Yes" },
+      ]
+    }
+  ];
+
+  // Flatten list for validation ordering
+  const ALL_ITEMS = SECTIONS.flatMap(s => s.items.map(it => ({...it, sectionId:s.id, sectionTitle:s.title})));
+
+  // ---------- Build UI ----------
+  $("dateStr").value = state.meta.dateHuman;
+
+  const checklistHost = $("checklistHost");
+
+  function renderChecklist(){
+    checklistHost.innerHTML = "";
+
+    for (const section of SECTIONS){
+      const det = document.createElement("details");
+      det.open = true;
+
+      const sum = document.createElement("summary");
+      sum.innerHTML = `
+        <div>${section.title}</div>
+        <div class="sum-right">
+          <span class="sum-dot" id="dot_${section.id}"></span>
+          <span id="stat_${section.id}"></span>
+        </div>
+      `;
+      det.appendChild(sum);
+
+      const qwrap = document.createElement("div");
+      qwrap.className = "qwrap";
+
+      section.items.forEach((item, idx) => {
+        // init state
+        if (!state.answers[item.id]){
+          state.answers[item.id] = { value: null, comment: "", benchColour: "" };
+        }
+
+        const q = document.createElement("div");
+        q.className = "q";
+        q.id = `q_${item.id}`;
+
+        const qNum = ALL_ITEMS.findIndex(x => x.id === item.id) + 1;
+
+        q.innerHTML = `
+          <div class="qhead">
+            <div class="qtext">${qNum}. ${item.text}</div>
+            <div class="qid">${item.id}</div>
+          </div>
+
+          <div class="answers" role="radiogroup" aria-label="${item.text}">
+            <input type="radio" name="a_${item.id}" id="a_${item.id}_yes" value="Yes">
+            <label class="yes" for="a_${item.id}_yes">Yes</label>
+
+            <input type="radio" name="a_${item.id}" id="a_${item.id}_no" value="No">
+            <label class="no" for="a_${item.id}_no">No</label>
+          </div>
+
+          <div class="follow" id="follow_${item.id}">
+            <div>
+              <label>Comments <span class="req" id="reqc_${item.id}" style="display:none;">*</span></label>
+              <textarea id="c_${item.id}" placeholder="Add details (what/where/why). If relevant, include cabinet location, wall, item, etc."></textarea>
+              <div class="noteTiny" id="hint_${item.id}" style="display:none;"></div>
+            </div>
+
+            <div class="benchRow" id="benchRow_${item.id}" style="display:none;">
+              <div>
+                <label>Factory bench colour <span class="req">*</span></label>
+                <div class="benchPills" id="bench_${item.id}">
+                  ${BENCH_COLOURS.map(col => `
+                    <input type="radio" name="b_${item.id}" id="b_${item.id}_${col}" value="${col}">
+                    <label for="b_${item.id}_${col}">${col}</label>
+                  `).join("")}
+                </div>
+                <div class="noteTiny">Select the bench colour if this issue relates to factory build/fitment/damage.</div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        qwrap.appendChild(q);
+
+        // Bind events (tablet-safe: listen on inputs, not div click hacks)
+        const yes = q.querySelector(`#a_${item.id}_yes`);
+        const no  = q.querySelector(`#a_${item.id}_no`);
+        const commentEl = q.querySelector(`#c_${item.id}`);
+
+        yes.addEventListener("change", () => setAnswer(item, "Yes"));
+        no.addEventListener("change", () => setAnswer(item, "No"));
+        commentEl.addEventListener("input", () => {
+          state.answers[item.id].comment = commentEl.value || "";
+          updateSectionStatus(section.id);
+        });
+
+        // Bench selection listeners
+        if (item.benchOn){
+          BENCH_COLOURS.forEach(col => {
+            const b = q.querySelector(`#b_${item.id}_${col}`);
+            b.addEventListener("change", () => {
+              state.answers[item.id].benchColour = col;
+              updateSectionStatus(section.id);
+            });
+          });
+        }
+
+        // Restore any existing state
+        restoreAnswerUI(item);
+      });
+
+      det.appendChild(qwrap);
+      checklistHost.appendChild(det);
+
+      // initial status
+      updateSectionStatus(section.id);
+    }
+  }
+
+  function setAnswer(item, val){
+    state.answers[item.id].value = val;
+    updateFollowups(item);
+    updateSectionStatus(item.sectionId || findSectionId(item.id));
+  }
+
+  function findSectionId(itemId){
+    for (const s of SECTIONS) if (s.items.some(i => i.id === itemId)) return s.id;
+    return "";
+  }
+
+  function restoreAnswerUI(item){
+    const a = state.answers[item.id];
+    if (!a) return;
+    const yes = $(`a_${item.id}_yes`);
+    const no  = $(`a_${item.id}_no`);
+    if (a.value === "Yes") yes.checked = true;
+    if (a.value === "No")  no.checked = true;
+    $(`c_${item.id}`).value = a.comment || "";
+    if (item.benchOn && a.benchColour){
+      const b = $(`b_${item.id}_${a.benchColour}`);
+      if (b) b.checked = true;
+    }
+    updateFollowups(item);
+  }
+
+  function needsComment(item, val){
+    if (!item.commentOn) return false;
+    return item.commentOn === val;
+  }
+  function needsBench(item, val){
+    if (!item.benchOn) return false;
+    return item.benchOn === val;
+  }
+
+  function updateFollowups(item){
+    const a = state.answers[item.id];
+    const follow = $(`follow_${item.id}`);
+    const reqC = $(`reqc_${item.id}`);
+    const hint = $(`hint_${item.id}`);
+    const benchRow = $(`benchRow_${item.id}`);
+
+    if (!a.value){
+      follow.classList.remove("show");
+      benchRow.style.display = "none";
+      reqC.style.display = "none";
+      hint.style.display = "none";
+      return;
+    }
+
+    const showComment = needsComment(item, a.value) || needsBench(item, a.value);
+    follow.classList.toggle("show", showComment);
+
+    const commentRequired = needsComment(item, a.value);
+    reqC.style.display = commentRequired ? "inline" : "none";
+
+    const showBench = needsBench(item, a.value);
+    benchRow.style.display = showBench ? "block" : "none";
+
+    // Helpful hint
+    if (showBench){
+      hint.style.display = "block";
+      hint.textContent = "If this is a factory-related issue, select the bench colour and describe the fault clearly.";
+    } else if (commentRequired){
+      hint.style.display = "block";
+      hint.textContent = "Please add enough detail so the office can action it without calling you back.";
+    } else {
+      hint.style.display = "none";
+    }
+
+    updateSectionStatus(findSectionId(item.id));
+  }
+
+  function updateSectionStatus(sectionId){
+    const section = SECTIONS.find(s => s.id === sectionId);
+    if (!section) return;
+
+    let answered = 0;
+    let missing = 0;
+    let needsAttention = 0;
+
+    for (const item of section.items){
+      const a = state.answers[item.id];
+      if (a?.value) answered++; else missing++;
+
+      if (a?.value){
+        // if comment required, check it
+        if (needsComment(item, a.value) && !(a.comment||"").trim()) needsAttention++;
+        // if bench required, check it
+        if (needsBench(item, a.value) && !(a.benchColour||"").trim()) needsAttention++;
+      }
+    }
+
+    const stat = $(`stat_${sectionId}`);
+    const dot = $(`dot_${sectionId}`);
+
+    const total = section.items.length;
+    stat.textContent = `${answered}/${total}`;
+
+    dot.classList.remove("ok","bad","warn");
+    if (missing > 0) dot.classList.add("warn");
+    else if (needsAttention > 0) dot.classList.add("bad");
+    else dot.classList.add("ok");
+  }
+
+  renderChecklist();
+
+  // ---------- Photos ----------
+  function addPhotos(files, targetArr, thumbsEl, prefix){
+    const maxFiles = 40; // sane limit per section
+    const incoming = Array.from(files || []).slice(0, maxFiles);
+
+    for (let i=0; i<incoming.length; i++){
+      const f = incoming[i];
+      const ts = nowStamp();
+      const ext = (f.type || "image/jpeg").includes("png") ? "png" : "jpg";
+      const name = `${prefix}_${ts}_${String(targetArr.length+1).padStart(2,'0')}.${ext}`;
+      targetArr.push({ name, blob: f, mime: f.type || "image/jpeg", ts });
+    }
+
+    renderThumbs(targetArr, thumbsEl);
+  }
+
+  function renderThumbs(arr, thumbsEl){
+    thumbsEl.innerHTML = "";
+    arr.forEach((p, idx) => {
+      const url = URL.createObjectURL(p.blob);
+      const div = document.createElement("div");
+      div.className = "thumb";
+      div.innerHTML = `
+        <button type="button" title="Remove photo">×</button>
+        <img src="${url}" alt="${p.name}">
+        <div class="meta"><span>${p.name}</span><span>${Math.round(p.blob.size/1024)}kb</span></div>
+      `;
+      div.querySelector("button").addEventListener("click", () => {
+        arr.splice(idx,1);
+        renderThumbs(arr, thumbsEl);
+        updateRequiredPhotoMsgs();
+      });
+      thumbsEl.appendChild(div);
+    });
+  }
+
+  function updateRequiredPhotoMsgs(){
+    $("preReqMsg").style.display = state.prePhotos.length ? "none" : "block";
+    $("finalReqMsg").style.display = state.finalPhotos.length ? "none" : "block";
+  }
+
+  $("prePhotoInput").addEventListener("change", (e) => {
+    addPhotos(e.target.files, state.prePhotos, $("preThumbs"), "pre");
+    e.target.value = "";
+    updateRequiredPhotoMsgs();
+  });
+  $("finalPhotoInput").addEventListener("change", (e) => {
+    addPhotos(e.target.files, state.finalPhotos, $("finalThumbs"), "final");
+    e.target.value = "";
+    updateRequiredPhotoMsgs();
+  });
+
+  updateRequiredPhotoMsgs();
+
+  // ---------- Validation ----------
+  function validateAll(){
+    // Clear previous missing highlights
+    document.querySelectorAll(".q.missing").forEach(el => el.classList.remove("missing"));
+    $("completeMsg").textContent = "";
+
+    // Header
+    state.meta.installer = $("installer").value || "";
+    state.meta.jobNumber = ($("jobNumber").value || "JB").trim();
+    state.meta.rooms = $("rooms").value || "";
+    state.meta.dailyNotes = $("dailyNotes").value || "";
+
+    const errs = [];
+
+    if (!state.meta.installer) errs.push({type:"header", msg:"Select an installer."});
+    if (!/^JB/i.test(state.meta.jobNumber)) errs.push({type:"header", msg:"Job number must start with JB."});
+    if (state.meta.jobNumber.length < 4) errs.push({type:"header", msg:"Enter a valid job number (e.g. JB8019)."});
+
+    // Photos
+    if (state.prePhotos.length === 0) errs.push({type:"photos_pre", msg:"Pre-install photos are required."});
+    if (state.finalPhotos.length === 0) errs.push({type:"photos_final", msg:"Final photos are required."});
+
+    // Questions: must all be answered + conditional requirements met
+    for (const item of ALL_ITEMS){
+      const a = state.answers[item.id];
+      const qEl = $(`q_${item.id}`);
+
+      if (!a || !a.value){
+        errs.push({type:"question", id:item.id, msg:`Missing answer: ${item.text}`});
+        if (qEl) qEl.classList.add("missing");
+        continue;
+      }
+
+      if (needsComment(item, a.value) && !(a.comment||"").trim()){
+        errs.push({type:"question", id:item.id, msg:`Comments required: ${item.text}`});
+        if (qEl) qEl.classList.add("missing");
+      }
+
+      if (needsBench(item, a.value) && !(a.benchColour||"").trim()){
+        errs.push({type:"question", id:item.id, msg:`Bench colour required: ${item.text}`});
+        if (qEl) qEl.classList.add("missing");
+      }
+    }
+
+    // Scroll to first missing item for speed
+    if (errs.length){
+      // Prioritise: header -> photos -> first missing question
+      const firstQ = errs.find(e => e.type === "question");
+      if (firstQ?.id){
+        const el = $(`q_${firstQ.id}`);
+        el?.scrollIntoView({behavior:"smooth", block:"center"});
+      } else if (errs.some(e => e.type === "photos_pre")){
+        $("cardPrePhotos").scrollIntoView({behavior:"smooth", block:"start"});
+      } else if (errs.some(e => e.type === "photos_final")){
+        $("cardFinalPhotos").scrollIntoView({behavior:"smooth", block:"start"});
+      } else {
+        $("cardHeader").scrollIntoView({behavior:"smooth", block:"start"});
+      }
+    }
+
+    return errs;
+  }
+
+  // ---------- PDF generation (in-app) ----------
+  async function buildPdfBlob(payload){
+    // jsPDF UMD
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+    const left = 40;
+    const top = 44;
+    const line = 16;
+    let y = top;
+
+    const addLine = (txt, size=11, bold=false) => {
+      doc.setFont("helvetica", bold ? "bold" : "normal");
+      doc.setFontSize(size);
+      const maxWidth = 515;
+      const lines = doc.splitTextToSize(txt, maxWidth);
+      for (const ln of lines){
+        if (y > 800){ doc.addPage(); y = top; }
+        doc.text(String(ln), left, y);
+        y += line;
+      }
+    };
+
+    addLine("Installer Daily Checklist", 16, true);
+    y += 6;
+
+    addLine(`Date: ${payload.meta.dateHuman} (${payload.meta.dateISO})`, 11, false);
+    addLine(`Installer: ${payload.meta.installer}`, 11, false);
+    addLine(`Job Number: ${payload.meta.jobNumber}`, 11, false);
+    if (payload.meta.rooms) addLine(`Rooms: ${payload.meta.rooms}`, 11, false);
+    if (payload.meta.dailyNotes) {
+      y += 6;
+      addLine("Daily Notes:", 12, true);
+      addLine(payload.meta.dailyNotes, 11, false);
+    }
+
+    y += 10;
+    addLine(`Pre-install photos: ${payload.prePhotosCount}`, 11, false);
+    addLine(`Final photos: ${payload.finalPhotosCount}`, 11, false);
+
+    y += 10;
+    addLine("Checklist Results", 13, true);
+    y += 2;
+
+    for (const section of SECTIONS){
+      y += 6;
+      addLine(section.title, 12, true);
+
+      for (const item of section.items){
+        const a = payload.answers[item.id];
+        const val = a?.value || "";
+        const bench = a?.benchColour ? ` (Bench: ${a.benchColour})` : "";
+        addLine(`- ${item.text}  →  ${val}${bench}`, 11, false);
+        if (a?.comment?.trim()){
+          addLine(`   Notes: ${a.comment.trim()}`, 10, false);
+        }
+      }
+    }
+
+    return doc.output("blob");
+  }
+
+  // ---------- ZIP Export ----------
+  async function exportZip(mode){
+    // Ensure libs loaded
+    if (!window.JSZip || !window.jspdf){
+      alert("Export libraries are still loading. Try again in 2–3 seconds.");
+      return;
+    }
+
+    const errs = validateAll();
+    if (mode === "complete" && errs.length){
+      $("completeMsg").innerHTML = `<span class="req">Fix highlighted items before completing.</span>`;
+      updateRequiredPhotoMsgs();
+      return;
+    }
+
+    const payload = {
+      meta: {...state.meta},
+      createdAt: new Date().toISOString(),
+      prePhotosCount: state.prePhotos.length,
+      finalPhotosCount: state.finalPhotos.length,
+      answers: JSON.parse(JSON.stringify(state.answers))
+    };
+
+    const zip = new JSZip();
+
+    const folderName =
+      `${safeName(payload.meta.jobNumber)}_${payload.meta.dateISO}_${safeName(payload.meta.installer)}`;
+
+    const root = zip.folder(folderName);
+
+    // JSON
+    root.file(`${folderName}.json`, JSON.stringify(payload, null, 2));
+
+    // PDF (generated)
+    const pdfBlob = await buildPdfBlob(payload);
+    root.file(`${folderName}.pdf`, pdfBlob);
+
+    // Photos
+    const preDir = root.folder("photos").folder("pre");
+    const finDir = root.folder("photos").folder("final");
+
+    for (const p of state.prePhotos){
+      preDir.file(p.name, p.blob);
+    }
+    for (const p of state.finalPhotos){
+      finDir.file(p.name, p.blob);
+    }
+
+    // Download zip
+    const blob = await zip.generateAsync({ type:"blob" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${folderName}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    if (mode === "complete"){
+      $("completeMsg").innerHTML = `✅ Exported <b>${folderName}.zip</b> — upload it to the JB folder in Drive.`;
+    }
+  }
+
+  // ---------- Buttons ----------
+  $("btnExportZip").addEventListener("click", () => exportZip("manual"));
+
+  $("btnDailyComplete").addEventListener("click", async () => {
+    $("completeMsg").textContent = "";
+    await exportZip("complete");
+  });
+
+  $("btnPrint").addEventListener("click", () => window.print());
+
+  $("btnReset").addEventListener("click", () => {
+    if (!confirm("Reset everything on this device for today? This clears answers and photos (not files already exported).")) return;
+
+    // Reset state
+    state.meta.installer = "";
+    state.meta.jobNumber = "JB";
+    state.meta.rooms = "";
+    state.meta.dailyNotes = "";
+
+    state.prePhotos = [];
+    state.finalPhotos = [];
+    state.answers = {};
+    $("installer").value = "";
+    $("jobNumber").value = "JB";
+    $("rooms").value = "";
+    $("dailyNotes").value = "";
+    $("preThumbs").innerHTML = "";
+    $("finalThumbs").innerHTML = "";
+    updateRequiredPhotoMsgs();
+    $("completeMsg").textContent = "";
+
+    renderChecklist();
+    $("cardHeader").scrollIntoView({behavior:"smooth", block:"start"});
+  });
+
+  // ---------- Service worker register ----------
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js").catch(()=>{});
+  }
+
+})();
+</script>
+
+</body>
+</html>
