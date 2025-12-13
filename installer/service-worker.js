@@ -1,4 +1,4 @@
-const CACHE = "installer-daily-v6";
+const CACHE = "installer-daily-v7";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();
