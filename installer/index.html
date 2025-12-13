@@ -12,27 +12,12 @@
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
 <style>
-:root{
-  --bg:#ffffff;
-  --card:#ffffff;
-  --border:#dbe2f0;
-  --blue:#0b5ed7;
-  --text:#000000;
-}
-body.dark{
-  --bg:#0f172a;
-  --card:#111827;
-  --border:#334155;
-  --blue:#3b82f6;
-  --text:#ffffff;
-}
-*{box-sizing:border-box}
 body{
   margin:0;
   font-family:Arial, Helvetica, sans-serif;
   font-weight:700;
-  background:var(--bg);
-  color:var(--text);
+  background:#fff;
+  color:#000;
 }
 .wrap{
   max-width:1000px;
@@ -41,8 +26,7 @@ body{
 }
 h1{margin:0 0 10px;font-weight:900}
 .card{
-  background:var(--card);
-  border:1px solid var(--border);
+  border:1px solid #dbe2f0;
   border-radius:14px;
   padding:14px;
   margin-bottom:14px;
@@ -52,7 +36,7 @@ input,select,textarea{
   width:100%;
   padding:14px;
   border-radius:12px;
-  border:1px solid var(--border);
+  border:1px solid #dbe2f0;
   font-weight:800;
   font-size:1.05rem;
 }
@@ -63,37 +47,35 @@ textarea{min-height:80px}
   gap:12px;
 }
 .btn{
-  background:var(--blue);
+  background:#0b5ed7;
   color:#fff;
   border:none;
   border-radius:999px;
   padding:14px 20px;
   font-weight:900;
-  cursor:pointer;
 }
 .btn.secondary{
-  background:transparent;
-  color:var(--text);
-  border:2px solid var(--blue);
+  background:#e8f0fe;
+  color:#0b5ed7;
 }
 .photoGrid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
   gap:10px;
   margin-top:10px;
 }
 .thumb{
-  border:1px solid var(--border);
+  border:1px solid #dbe2f0;
   border-radius:10px;
   overflow:hidden;
 }
 .thumb img{
   width:100%;
-  height:90px;
+  height:80px;
   object-fit:cover;
 }
 .q{
-  border:1px solid var(--border);
+  border:1px solid #dbe2f0;
   border-radius:12px;
   padding:12px;
   margin-top:12px;
@@ -109,8 +91,7 @@ textarea{min-height:80px}
   text-align:center;
   padding:14px;
   border-radius:999px;
-  border:2px solid var(--border);
-  cursor:pointer;
+  border:2px solid #dbe2f0;
 }
 .choice input:checked+label.y{background:#dcfce7}
 .choice input:checked+label.n{background:#fee2e2}
@@ -118,8 +99,8 @@ textarea{min-height:80px}
 .bottom{
   position:fixed;
   left:0;right:0;bottom:0;
-  background:var(--bg);
-  border-top:1px solid var(--border);
+  background:#fff;
+  border-top:1px solid #dbe2f0;
   padding:10px;
 }
 .bottomInner{
@@ -128,18 +109,12 @@ textarea{min-height:80px}
   display:flex;
   justify-content:flex-end;
 }
-.toggle{
-  cursor:pointer;
-  font-weight:900;
-  text-decoration:underline;
-}
 </style>
 </head>
 
 <body>
 <div class="wrap">
 <h1>Installer Daily Report</h1>
-<div class="toggle" onclick="toggleMode()">Light / Dark</div>
 
 <div class="card">
 <div class="row">
@@ -159,38 +134,31 @@ textarea{min-height:80px}
 
 <div style="margin-top:10px">
 <label>Installed Rooms</label>
-<input id="rooms" placeholder="Kitchen, Laundry, Vanities">
+<input id="rooms">
 </div>
 </div>
 
-<!-- PRE PHOTOS -->
 <div class="card">
-<label class="btn secondary">
-Add Pre Photos
-<input type="file" id="pre" accept="image/*" capture="environment" multiple hidden>
+<label class="btn secondary">Add Pre Photos
+<input type="file" accept="image/*" multiple hidden id="pre">
 </label>
 <div id="preGrid" class="photoGrid"></div>
 </div>
 
-<!-- ISSUE PHOTOS -->
 <div class="card">
-<label class="btn secondary">
-Add Issue Photos
-<input type="file" id="issue" accept="image/*" capture="environment" multiple hidden>
+<label class="btn secondary">Add Issue Photos
+<input type="file" accept="image/*" multiple hidden id="issue">
 </label>
 <div id="issueGrid" class="photoGrid"></div>
 </div>
 
-<!-- FINAL PHOTOS -->
 <div class="card">
-<label class="btn secondary">
-Add Final Photos
-<input type="file" id="final" accept="image/*" capture="environment" multiple hidden>
+<label class="btn secondary">Add Final Photos
+<input type="file" accept="image/*" multiple hidden id="final">
 </label>
 <div id="finalGrid" class="photoGrid"></div>
 </div>
 
-<!-- CHECKLIST -->
 <div class="card">
 <b>Checklist</b>
 <div id="checklist"></div>
@@ -205,33 +173,31 @@ Add Final Photos
 
 <script>
 const QUESTIONS=[
-["Prior damage to walls / area?","Yes"],
-["Prior damage to cabinetry?","Yes"],
-["Access issues?","Yes"],
-["Site issues?","Yes"],
-["Was installation delayed?","Yes"],
-["Wall dimensions correct?","No"],
-["Bulkheads / kickboards correct?","No"],
-["Doors / drawers operating correctly?","No"],
-["Cabinet build correct?","No","builder"],
-["Hardware missing?","Yes"],
-["Hardware incorrect?","Yes"],
-["Handles fitted / correct?","No"],
-["Bump-ons fitted?","No"],
-["Plastic legs incorrect?","Yes"],
-["Pull-out / lighting issues?","Yes"],
-["Return visit required?","Yes"],
-["Dispute / builder claim risk?","Yes"]
+"Prior damage to walls / area?",
+"Prior damage to cabinetry?",
+"Access issues?",
+"Site issues?",
+"Was installation delayed?",
+"Wall dimensions correct?",
+"Bulkheads / kickboards correct?",
+"Doors / drawers operating correctly?",
+"Cabinet build correct?",
+"Hardware missing?",
+"Hardware incorrect?",
+"Handles fitted / correct?",
+"Bump-ons fitted?",
+"Plastic legs incorrect?",
+"Pull-out / lighting issues?",
+"Return visit required?"
 ];
 
 const photos={pre:[],issue:[],final:[]};
 const thumbs={pre:[],issue:[],final:[]};
 
 document.getElementById("date").value=new Date().toLocaleDateString();
-
 document.getElementById("job").oninput=e=>{
 let v=e.target.value||"";
-if(v.length>=2)v="JB"+v.slice(2);
+if(!v.startsWith("JB"))v="JB"+v.replace(/[^0-9]/g,"");
 e.target.value=v.toUpperCase();
 };
 
@@ -239,33 +205,29 @@ const checklist=document.getElementById("checklist");
 QUESTIONS.forEach((q,i)=>{
 const d=document.createElement("div");
 d.className="q";
-d.innerHTML=`${i+1}. ${q[0]}
+d.innerHTML=`${i+1}. ${q}
 <div class="choice">
 <input type="radio" name="q${i}" value="Yes" id="y${i}">
 <label class="y" for="y${i}">Yes</label>
 <input type="radio" name="q${i}" value="No" id="n${i}">
 <label class="n" for="n${i}">No</label>
 </div>
-<div class="follow">
-${q[2]==="builder" ? `<input placeholder="Built by">` : ""}
-<textarea placeholder="Issue / Comment"></textarea>
-</div>`;
+<div class="follow"><textarea placeholder="Comment (if required)"></textarea></div>`;
 checklist.appendChild(d);
 
 const follow=d.querySelector(".follow");
-d.querySelectorAll("input[type=radio]").forEach(r=>{
-r.onchange=()=>follow.style.display=(r.value===q[1])?"block":"none";
+d.querySelectorAll("input").forEach(r=>{
+r.onchange=()=>follow.style.display="block";
 });
 });
 
 async function makeThumb(file){
 const img=await createImageBitmap(file);
-const scale=100/img.width;
-const canvas=document.createElement("canvas");
-canvas.width=100;
-canvas.height=img.height*scale;
-canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
-return canvas.toDataURL("image/jpeg",0.6);
+const scale=90/img.width;
+const c=document.createElement("canvas");
+c.width=90;c.height=img.height*scale;
+c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+return c.toDataURL("image/jpeg",0.6);
 }
 
 ["pre","issue","final"].forEach(k=>{
@@ -274,11 +236,11 @@ for(const f of e.target.files){
 photos[k].push(f);
 thumbs[k].push(await makeThumb(f));
 }
-renderPhotos();
+render();
 };
 });
 
-function renderPhotos(){
+function render(){
 ["pre","issue","final"].forEach(k=>{
 const g=document.getElementById(k+"Grid");
 g.innerHTML="";
@@ -291,59 +253,43 @@ g.appendChild(d);
 });
 }
 
-function toggleMode(){
-document.body.classList.toggle("dark");
-}
-
 async function exportZIP(){
-try{
 const zip=new JSZip();
-const job=document.getElementById("job").value||"JB";
-const base=`${job} – ${rooms.value||"Rooms"} – ${installer.value||"Installer"} – ${date.value}`;
+const job=jobInput.value||"JB";
+const name=`${job} – ${installer.value} – ${date.value}`;
 
 const {jsPDF}=window.jspdf;
-const doc=new jsPDF();
+const pdf=new jsPDF();
 let y=10;
 
-doc.text(`Job: ${job}`,10,y);y+=8;
-doc.text(`Rooms: ${rooms.value}`,10,y);y+=8;
-doc.text(`Installer: ${installer.value}`,10,y);y+=8;
-doc.text(`Date: ${date.value}`,10,y);y+=10;
+pdf.setFont("helvetica","bold");
+pdf.text(`Job: ${job}`,10,y);y+=8;
+pdf.text(`Rooms: ${rooms.value}`,10,y);y+=8;
+pdf.text(`Installer: ${installer.value}`,10,y);y+=8;
+pdf.text(`Date: ${date.value}`,10,y);y+=10;
 
-document.querySelectorAll(".q").forEach(q=>{
-doc.text(q.innerText,10,y);
-y+=8;
-if(y>280){doc.addPage();y=10;}
+pdf.setFont("helvetica","normal");
+document.querySelectorAll(".q").forEach((q,i)=>{
+const ans=q.querySelector("input:checked");
+pdf.text(`${i+1}. ${QUESTIONS[i]}  —  ${ans?ans.value:"Not answered"}`,10,y);
+y+=7;
+const t=q.querySelector("textarea").value;
+if(t){pdf.text(`   Comment: ${t}`,10,y);y+=7;}
+if(y>270){pdf.addPage();y=10;}
 });
 
-zip.file("Daily Report.pdf",doc.output("arraybuffer"));
+zip.file("Daily Report.pdf",pdf.output("arraybuffer"));
 
 ["pre","issue","final"].forEach(k=>{
-const folder=zip.folder(`Photos – ${k.charAt(0).toUpperCase()+k.slice(1)}`);
-photos[k].forEach((f,i)=>{
-folder.file(`${k}_${String(i+1).padStart(2,"0")}.jpg`,f);
-});
+const f=zip.folder(`Photos – ${k}`);
+photos[k].forEach((p,i)=>f.file(`${k}_${i+1}.jpg`,p));
 });
 
 const blob=await zip.generateAsync({type:"blob"});
 const a=document.createElement("a");
 a.href=URL.createObjectURL(blob);
-a.download=base+".zip";
-document.body.appendChild(a);
+a.download=name+".zip";
 a.click();
-document.body.removeChild(a);
-URL.revokeObjectURL(a.href);
-
-seenAlert();
-location.reload();
-}catch(e){
-alert("Export failed. Try again.");
-console.error(e);
-}
-}
-
-function seenAlert(){
-alert("ZIP exported successfully");
 }
 </script>
 </body>
