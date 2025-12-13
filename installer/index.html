@@ -1,888 +1,297 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Installer Daily Report</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installer Daily Report</title>
 
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#0b5ed7" />
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b5ed7">
 
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
-  <style>
-    :root{
-      --bg:#ffffff;
-      --card:#ffffff;
-      --border:#dbe2f0;
-      --blue:#0b5ed7;
-      --text:#000000;
-      --muted:#111827;
-      --shadow: 0 10px 22px rgba(0,0,0,.08);
-    }
-    body.dark{
-      --bg:#0b1220;
-      --card:#0f1a30;
-      --border:#243454;
-      --blue:#3b82f6;
-      --text:#ffffff;
-      --muted:#e5e7eb;
-      --shadow: 0 10px 22px rgba(0,0,0,.35);
-    }
-
-    *{ box-sizing:border-box; }
-    body{
-      margin:0;
-      background:var(--bg);
-      color:var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-      font-weight: 700;
-    }
-    .wrap{
-      max-width: 1020px;
-      margin: 0 auto;
-      padding: 16px 16px 140px;
-    }
-    h1{
-      margin: 0 0 10px;
-      font-size: 1.4rem;
-      font-weight: 900;
-    }
-
-    .topRow{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom: 10px;
-    }
-    .toggle{
-      border:2px solid var(--border);
-      background:transparent;
-      color:var(--text);
-      padding:10px 14px;
-      border-radius:999px;
-      cursor:pointer;
-      font-weight:900;
-      user-select:none;
-    }
-
-    .card{
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      box-shadow: var(--shadow);
-      padding: 14px;
-      margin-bottom: 14px;
-    }
-
-    .row{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-    }
-
-    label{
-      display:block;
-      font-weight: 900;
-      margin-bottom: 6px;
-      color: var(--muted);
-    }
-
-    input[type="text"], select, textarea{
-      width:100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-      font-weight: 800;
-      font-size: 1.05rem;
-      outline:none;
-    }
-    textarea{ min-height: 84px; resize: vertical; font-weight: 800; }
-
-    .sectionTitle{
-      font-size: 1.05rem;
-      font-weight: 900;
-      margin-bottom: 10px;
-    }
-
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      background: var(--blue);
-      color: #fff;
-      border: none;
-      padding: 14px 18px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 900;
-      user-select:none;
-      text-decoration:none;
-    }
-    .btn.secondary{
-      background: transparent;
-      color: var(--text);
-      border: 2px solid var(--blue);
-    }
-
-    .photoGrid{
-      display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 10px;
-      margin-top: 12px;
-    }
-    .thumb{
-      position:relative;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow:hidden;
-      background: #00000010;
-    }
-    .thumb img{
-      width:100%;
-      height: 92px;
-      object-fit: cover;
-      display:block;
-      background: #00000010;
-    }
-    .thumb .x{
-      position:absolute;
-      top:6px; right:6px;
-      width:32px; height:32px;
-      border:none;
-      border-radius:999px;
-      background: rgba(11,94,215,.92);
-      color:#fff;
-      font-weight: 900;
-      cursor:pointer;
-    }
-
-    .q{
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      margin-top: 12px;
-      background: transparent;
-    }
-    .q.missing{
-      outline: 4px solid rgba(245,158,11,.35);
-    }
-    .qHead{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
-    }
-    .qText{
-      font-weight: 900;
-      font-size: 1.03rem;
-      line-height: 1.25rem;
-    }
-    .qNum{
-      opacity:.7;
-      font-weight:900;
-      white-space:nowrap;
-    }
-    .choice{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .choice input{ display:none; }
-    .choice label{
-      margin:0;
-      text-align:center;
-      padding: 14px;
-      border-radius: 999px;
-      border: 2px solid var(--border);
-      cursor:pointer;
-      user-select:none;
-      font-weight: 900;
-      background: transparent;
-      color: var(--text);
-    }
-    .choice input:checked + label.y{
-      background:#dcfce7;
-      border-color:#86efac;
-      color:#052e16;
-    }
-    .choice input:checked + label.n{
-      background:#fee2e2;
-      border-color:#fca5a5;
-      color:#450a0a;
-    }
-    body.dark .choice input:checked + label.y{ color:#052e16; }
-    body.dark .choice input:checked + label.n{ color:#450a0a; }
-
-    .follow{
-      display:none;
-      margin-top:10px;
-    }
-    .follow.show{ display:block; }
-
-    .bottom{
-      position:fixed;
-      left:0; right:0; bottom:0;
-      background: color-mix(in srgb, var(--bg) 92%, transparent);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid var(--border);
-      padding: 10px 12px;
-      z-index: 1000;
-    }
-    .bottomInner{
-      max-width: 1020px;
-      margin: 0 auto;
-      display:flex;
-      justify-content:space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items:center;
-    }
-    .status{
-      font-weight: 900;
-      opacity: .9;
-    }
-
-    @media (pointer: coarse){
-      .thumb img{ height: 106px; }
-      .photoGrid{ grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)); }
-      input[type="text"], select, textarea{ font-size:1.12rem; padding: 16px; }
-      .btn{ padding: 16px 20px; font-size:1.05rem; }
-    }
-  </style>
+<style>
+:root{
+  --bg:#ffffff;
+  --card:#ffffff;
+  --border:#dbe2f0;
+  --blue:#0b5ed7;
+  --text:#000000;
+}
+body.dark{
+  --bg:#0f172a;
+  --card:#111827;
+  --border:#334155;
+  --blue:#3b82f6;
+  --text:#ffffff;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  font-weight:700;
+  background:var(--bg);
+  color:var(--text);
+}
+.wrap{
+  max-width:1000px;
+  margin:auto;
+  padding:16px 16px 140px;
+}
+h1{margin:0 0 10px;font-weight:900}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:14px;
+}
+label{font-weight:900;margin-bottom:6px;display:block}
+input,select,textarea{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  font-weight:800;
+  font-size:1.05rem;
+}
+textarea{min-height:80px}
+.row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+}
+.btn{
+  background:var(--blue);
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  padding:14px 20px;
+  font-weight:900;
+  cursor:pointer;
+}
+.btn.secondary{
+  background:transparent;
+  color:var(--text);
+  border:2px solid var(--blue);
+}
+.q{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  margin-top:12px;
+}
+.choice{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:8px;
+}
+.choice input{display:none}
+.choice label{
+  text-align:center;
+  padding:14px;
+  border-radius:999px;
+  border:2px solid var(--border);
+  cursor:pointer;
+}
+.choice input:checked+label.y{background:#dcfce7}
+.choice input:checked+label.n{background:#fee2e2}
+.follow{display:none;margin-top:8px}
+.photoGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
+  gap:10px;
+  margin-top:10px;
+}
+.thumb img{
+  width:100%;
+  height:90px;
+  object-fit:cover;
+  border-radius:10px;
+}
+.bottom{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  background:var(--bg);
+  border-top:1px solid var(--border);
+  padding:10px;
+}
+.bottomInner{
+  max-width:1000px;
+  margin:auto;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+.toggle{cursor:pointer;font-weight:900;text-decoration:underline}
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="topRow">
-      <h1>Installer Daily Report</h1>
-      <button class="toggle" id="modeBtn" type="button">Light / Dark</button>
-    </div>
+<div class="wrap">
+<h1>Installer Daily Report</h1>
+<div class="toggle" onclick="toggleMode()">Light / Dark</div>
 
-    <div class="card">
-      <div class="row">
-        <div>
-          <label>Date</label>
-          <input id="dateHuman" type="text" readonly />
-        </div>
+<div class="card">
+<div class="row">
+<div><label>Date</label><input id="date" readonly></div>
+<div>
+<label>Installer</label>
+<select id="installer">
+<option value="">Select</option>
+<option>Installer 1</option>
+<option>Installer 2</option>
+<option>Installer 3</option>
+<option>Installer 4</option>
+</select>
+</div>
+<div><label>Job Number</label><input id="job" value="JB"></div>
+</div>
 
-        <div>
-          <label>Installer</label>
-          <select id="installer">
-            <option value="">Select</option>
-            <option>Installer 1</option>
-            <option>Installer 2</option>
-            <option>Installer 3</option>
-            <option>Installer 4</option>
-          </select>
-        </div>
+<div style="margin-top:10px">
+<label>Installed Rooms</label>
+<input id="rooms" placeholder="Kitchen, Laundry, Vanities">
+</div>
+</div>
 
-        <div>
-          <label>Job Number</label>
-          <input id="jobNumber" type="text" value="JB" autocomplete="off" spellcheck="false" />
-        </div>
-      </div>
+<div class="card">
+<label class="btn secondary">Add Pre Photos<input type="file" id="pre" multiple hidden></label>
+<div id="preGrid" class="photoGrid"></div>
+</div>
 
-      <div style="margin-top:12px;">
-        <label>Installed Rooms</label>
-        <input id="rooms" type="text" placeholder="Kitchen, Laundry, Vanities" />
-      </div>
+<div class="card">
+<label class="btn secondary">Add Issue Photos<input type="file" id="issue" multiple hidden></label>
+<div id="issueGrid" class="photoGrid"></div>
+</div>
 
-      <div style="margin-top:12px;">
-        <label>Notes</label>
-        <textarea id="notes"></textarea>
-      </div>
-    </div>
+<div class="card">
+<label class="btn secondary">Add Final Photos<input type="file" id="final" multiple hidden></label>
+<div id="finalGrid" class="photoGrid"></div>
+</div>
 
-    <!-- Photos: stacked vertically (no overlap) -->
-    <div class="card">
-      <div class="sectionTitle">Pre Photos</div>
-      <label class="btn secondary" for="preInput">Add Photos</label>
-      <input id="preInput" type="file" accept="image/*" capture="environment" multiple hidden />
-      <div id="preGrid" class="photoGrid"></div>
-    </div>
+<div class="card">
+<b>Checklist</b>
+<div id="checklist"></div>
+</div>
+</div>
 
-    <div class="card">
-      <div class="sectionTitle">Issue Photos</div>
-      <label class="btn secondary" for="issueInput">Add Photos</label>
-      <input id="issueInput" type="file" accept="image/*" capture="environment" multiple hidden />
-      <div id="issueGrid" class="photoGrid"></div>
-    </div>
-
-    <div class="card">
-      <div class="sectionTitle">Final Photos</div>
-      <label class="btn secondary" for="finalInput">Add Photos</label>
-      <input id="finalInput" type="file" accept="image/*" capture="environment" multiple hidden />
-      <div id="finalGrid" class="photoGrid"></div>
-    </div>
-
-    <div class="card">
-      <div class="sectionTitle">Checklist</div>
-      <div id="checklistHost"></div>
-    </div>
-  </div>
-
-  <div class="bottom">
-    <div class="bottomInner">
-      <div class="status" id="statusLine">Saved</div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="btn" id="exportBtn" type="button">Finish & Export PDF</button>
-        <button class="btn secondary" id="clearBtn" type="button">Clear Day</button>
-      </div>
-    </div>
-  </div>
+<div class="bottom">
+<div class="bottomInner">
+<div></div>
+<button class="btn" onclick="exportZIP()">Finish & Export ZIP</button>
+</div>
+</div>
 
 <script>
-(() => {
-  const $ = (id) => document.getElementById(id);
-
-  // ---------- Date helpers ----------
-  const isoDate = () => {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,'0');
-    const day = String(d.getDate()).padStart(2,'0');
-    return `${y}-${m}-${day}`;
-  };
-  const humanDate = () =>
-    new Date().toLocaleDateString(undefined, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-
-  const safeName = (s) => String(s || "")
-    .trim()
-    .replace(/[\\\/:*?"<>|]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  // ---------- Persistent storage ----------
-  const dayKey = `installer_daily:${isoDate()}`;
-  const lastKey = "installer_daily:lastKey";
-
-  // Photos in IndexedDB so they survive reloads all day
-  const DB_NAME = "installer_daily_db";
-  const DB_VER = 1;
-  const STORE = "photos";
-
-  function openDB(){
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, DB_VER);
-      req.onupgradeneeded = () => {
-        const db = req.result;
-        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath:"id" });
-      };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  }
-  async function putPhoto(rec){
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, "readwrite");
-      tx.objectStore(STORE).put(rec);
-      tx.oncomplete = () => resolve(true);
-      tx.onerror = () => reject(tx.error);
-    });
-  }
-  async function getPhoto(id){
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, "readonly");
-      const req = tx.objectStore(STORE).get(id);
-      req.onsuccess = () => resolve(req.result || null);
-      req.onerror = () => reject(req.error);
-    });
-  }
-  async function deletePhoto(id){
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, "readwrite");
-      tx.objectStore(STORE).delete(id);
-      tx.oncomplete = () => resolve(true);
-      tx.onerror = () => reject(tx.error);
-    });
-  }
-  async function clearAllPhotos(){
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, "readwrite");
-      tx.objectStore(STORE).clear();
-      tx.oncomplete = () => resolve(true);
-      tx.onerror = () => reject(tx.error);
-    });
-  }
-
-  // ---------- Photo processing (resize+compress) ----------
-  // Keeps app usable + PDF zoomable.
-  // 2000px max edge is a good compromise for scratches/detail vs file size.
-  const MAX_EDGE = 2000;
-  const JPEG_QUALITY = 0.85;
-
-  async function fileToProcessedJpegBlob(file){
-    const bitmap = await createImageBitmap(file);
-    let { width, height } = bitmap;
-
-    const scale = Math.min(1, MAX_EDGE / Math.max(width, height));
-    const outW = Math.round(width * scale);
-    const outH = Math.round(height * scale);
-
-    const canvas = document.createElement("canvas");
-    canvas.width = outW;
-    canvas.height = outH;
-    const ctx = canvas.getContext("2d", { alpha:false });
-    ctx.drawImage(bitmap, 0, 0, outW, outH);
-
-    return new Promise((resolve) => {
-      canvas.toBlob((blob) => resolve(blob), "image/jpeg", JPEG_QUALITY);
-    });
-  }
-
-  async function blobToDataURL(blob){
-    return new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result);
-      r.onerror = () => reject(r.error);
-      r.readAsDataURL(blob);
-    });
-  }
-
-  // ---------- Checklist schema ----------
-  // commentOn: show comment box if answer matches
-  const QUESTIONS = [
-    { id:"damage_noted", text:"Damage noted?", commentOn:"Yes" },           // merged Q1+Q3
-    { id:"cab_missing",  text:"Cabinetry missing?", commentOn:"Yes" },
-    { id:"access",       text:"Access issues?", commentOn:"Yes" },
-    { id:"site_issues",  text:"Site issues?", commentOn:"Yes" },
-    { id:"delayed",      text:"Install delayed?", commentOn:"Yes" },
-
-    { id:"dims_wrong",   text:"Dimensions wrong?", commentOn:"Yes" },
-    { id:"walls_level",  text:"Walls/floors out of level affecting fit?", commentOn:"Yes" },
-    { id:"bulk_kick",    text:"Bulkheads/kickboards wrong length?", commentOn:"Yes" },
-
-    { id:"cab_fault",    text:"Cabinet build fault?", commentOn:"Yes" },
-    { id:"legs",         text:"Plastic legs incorrect?", commentOn:"Yes" },
-
-    { id:"hw_missing",   text:"Hardware missing?", commentOn:"Yes" },
-    { id:"hw_wrong",     text:"Hardware incorrect?", commentOn:"Yes" },
-    { id:"pull_light",   text:"Pull-outs/lighting issues?", commentOn:"Yes" },
-
-    { id:"handles",      text:"Handles fitted / correct?", commentOn:"No" },
-    { id:"bumpons",      text:"Bump-ons fitted?", commentOn:"No" },
-    { id:"doors",        text:"Doors/drawers operating ok today?", commentOn:"No" },
-
-    { id:"dispute",      text:"Dispute risk / builder claim risk?", commentOn:"Yes" },
-    { id:"return",       text:"Return visit required?", commentOn:"Yes" }
-  ];
-
-  // ---------- State ----------
-  const state = {
-    meta: {
-      dateISO: isoDate(),
-      dateHuman: humanDate(),
-      installer: "",
-      jobNumber: "JB",
-      rooms: "",
-      notes: "",
-      theme: "light"
-    },
-    answers: {}, // id -> { value: "Yes"|"No"|null, comment:"" }
-    photos: { pre:[], issue:[], final:[] } // arrays of {id, name}
-  };
-
-  const statusLine = $("statusLine");
-
-  function setStatus(msg){
-    statusLine.textContent = msg;
-  }
-
-  function enforceJBUpper(v){
-    v = String(v || "");
-    if (v.length >= 2) v = "JB" + v.slice(2);
-    v = v.toUpperCase();
-    if (!v.startsWith("JB")) v = "JB";
-    return v;
-  }
-
-  // ---------- Save/Load ----------
-  function saveState(){
-    state.meta.installer = $("installer").value || "";
-    state.meta.jobNumber = enforceJBUpper($("jobNumber").value || "JB");
-    state.meta.rooms = $("rooms").value || "";
-    state.meta.notes = $("notes").value || "";
-
-    $("jobNumber").value = state.meta.jobNumber;
-
-    localStorage.setItem(dayKey, JSON.stringify(state));
-    localStorage.setItem(lastKey, dayKey);
-    setStatus("Saved");
-  }
-
-  function loadState(){
-    const k = localStorage.getItem(lastKey) || dayKey;
-    const raw = localStorage.getItem(k);
-    if (!raw) return false;
-    try{
-      const parsed = JSON.parse(raw);
-      if (parsed?.meta?.dateISO !== state.meta.dateISO) return false;
-
-      Object.assign(state.meta, parsed.meta || {});
-      state.answers = parsed.answers || {};
-      state.photos = parsed.photos || { pre:[], issue:[], final:[] };
-      return true;
-    }catch{
-      return false;
-    }
-  }
-
-  // ---------- Render checklist ----------
-  const host = $("checklistHost");
-
-  function renderChecklist(){
-    host.innerHTML = "";
-    QUESTIONS.forEach((q, idx) => {
-      if (!state.answers[q.id]) state.answers[q.id] = { value:null, comment:"" };
-      const a = state.answers[q.id];
-
-      const wrap = document.createElement("div");
-      wrap.className = "q";
-      wrap.id = `q_${q.id}`;
-
-      wrap.innerHTML = `
-        <div class="qHead">
-          <div class="qText">${idx+1}. ${q.text}</div>
-          <div class="qNum">${q.id}</div>
-        </div>
-
-        <div class="choice">
-          <input type="radio" name="a_${q.id}" id="a_${q.id}_yes" value="Yes">
-          <label class="y" for="a_${q.id}_yes">Yes</label>
-
-          <input type="radio" name="a_${q.id}" id="a_${q.id}_no" value="No">
-          <label class="n" for="a_${q.id}_no">No</label>
-        </div>
-
-        <div class="follow" id="f_${q.id}">
-          <label>Comment</label>
-          <textarea id="c_${q.id}"></textarea>
-        </div>
-      `;
-
-      host.appendChild(wrap);
-
-      // restore UI
-      if (a.value === "Yes") wrap.querySelector(`#a_${q.id}_yes`).checked = true;
-      if (a.value === "No")  wrap.querySelector(`#a_${q.id}_no`).checked = true;
-      wrap.querySelector(`#c_${q.id}`).value = a.comment || "";
-
-      // show/hide follow
-      function updateFollow(){
-        const follow = $(`f_${q.id}`);
-        if (!a.value) { follow.classList.remove("show"); return; }
-        if (q.commentOn === a.value) follow.classList.add("show");
-        else follow.classList.remove("show");
-      }
-      updateFollow();
-
-      // events
-      wrap.querySelector(`#a_${q.id}_yes`).addEventListener("change", () => {
-        a.value = "Yes";
-        if (q.commentOn !== "Yes") a.comment = "";
-        updateFollow();
-        saveState();
-      });
-      wrap.querySelector(`#a_${q.id}_no`).addEventListener("change", () => {
-        a.value = "No";
-        if (q.commentOn !== "No") a.comment = "";
-        updateFollow();
-        saveState();
-      });
-      wrap.querySelector(`#c_${q.id}`).addEventListener("input", (e) => {
-        a.comment = e.target.value || "";
-        saveState();
-      });
-    });
-  }
-
-  function highlightMissing(){
-    document.querySelectorAll(".q.missing").forEach(el => el.classList.remove("missing"));
-    for (const q of QUESTIONS){
-      const a = state.answers[q.id];
-      let bad = false;
-      if (!a?.value) bad = true;
-      else if (q.commentOn === a.value && !(a.comment||"").trim()) bad = true;
-
-      if (bad){
-        const el = $(`q_${q.id}`);
-        if (el) el.classList.add("missing");
-      }
-    }
-  }
-
-  // ---------- Photos render ----------
-  async function renderPhotoGrid(kind){
-    const grid = kind==="pre" ? $("preGrid") : kind==="issue" ? $("issueGrid") : $("finalGrid");
-    grid.innerHTML = "";
-
-    for (let i=0; i<state.photos[kind].length; i++){
-      const ref = state.photos[kind][i];
-      const rec = await getPhoto(ref.id);
-      if (!rec?.blob) continue;
-
-      const url = URL.createObjectURL(rec.blob);
-      const div = document.createElement("div");
-      div.className = "thumb";
-      div.innerHTML = `
-        <button class="x" type="button" title="Remove">×</button>
-        <img src="${url}" alt="">
-      `;
-      div.querySelector(".x").addEventListener("click", async () => {
-        await deletePhoto(ref.id);
-        state.photos[kind].splice(i, 1);
-        saveState();
-        await renderPhotoGrid(kind);
-      });
-
-      grid.appendChild(div);
-    }
-  }
-
-  async function addPhotos(kind, fileList){
-    const files = Array.from(fileList || []);
-    for (const f of files){
-      setStatus("Processing photo…");
-
-      // Resize+compress -> jpeg blob
-      const processed = await fileToProcessedJpegBlob(f);
-      const id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random()}`);
-      const name = `${kind}_${state.meta.dateISO}_${String(state.photos[kind].length+1).padStart(2,"0")}.jpg`;
-
-      await putPhoto({ id, kind, name, blob: processed });
-      state.photos[kind].push({ id, name });
-      saveState();
-    }
-    await renderPhotoGrid(kind);
-    setStatus("Saved");
-  }
-
-  // ---------- PDF Export (photos embedded) ----------
-  function pdfFileName(){
-    const jb = enforceJBUpper($("jobNumber").value || "JB");
-    const rooms = safeName($("rooms").value || "Rooms");
-    const inst = safeName($("installer").value || "Installer");
-    const d = isoDate();
-    return `${jb} – ${rooms || "Rooms"} – ${inst} – ${d}.pdf`;
-  }
-
-  async function exportPDF(){
-    if (!window.jspdf?.jsPDF){
-      alert("PDF library still loading. Try again in a moment.");
-      return;
-    }
-
-    saveState();
-    highlightMissing();
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit:"pt", format:"a4" });
-
-    const L = 40;
-    const W = 515;
-    let y = 44;
-
-    const addLine = (text, size=11, bold=true) => {
-      doc.setFont("helvetica", bold ? "bold" : "normal");
-      doc.setFontSize(size);
-      const lines = doc.splitTextToSize(String(text), W);
-      for (const ln of lines){
-        if (y > 790){ doc.addPage(); y = 44; }
-        doc.text(ln, L, y);
-        y += 16;
-      }
-    };
-
-    // Header
-    addLine("Installer Daily Report", 16, true);
-    addLine(`Job: ${enforceJBUpper(state.meta.jobNumber)}`, 12, true);
-    addLine(`Rooms: ${state.meta.rooms || "NOT PROVIDED"}`, 12, true);
-    addLine(`Installer: ${state.meta.installer || "NOT PROVIDED"}`, 12, true);
-    addLine(`Date: ${state.meta.dateHuman} (${state.meta.dateISO})`, 11, false);
-
-    if ((state.meta.notes||"").trim()){
-      y += 8;
-      addLine("Notes:", 12, true);
-      addLine(state.meta.notes.trim(), 11, false);
-    }
-
-    // Checklist
-    y += 10;
-    addLine("Checklist", 13, true);
-    y += 2;
-
-    QUESTIONS.forEach((q, idx) => {
-      const a = state.answers[q.id] || {};
-      const v = a.value || "MISSING";
-      addLine(`${idx+1}. ${q.text} → ${v}`, 11, true);
-      if (a.value && q.commentOn === a.value && !(a.comment||"").trim()){
-        addLine(`   Comment: MISSING`, 10, true);
-      } else if ((a.comment||"").trim()){
-        addLine(`   Comment: ${a.comment.trim()}`, 10, false);
-      }
-    });
-
-    // Photos pages
-    async function addPhotoSection(title, kind){
-      y += 14;
-      addLine(title, 13, true);
-      y += 4;
-
-      const refs = state.photos[kind];
-      if (!refs.length){
-        addLine("NOT PROVIDED", 11, true);
-        return;
-      }
-
-      // Grid in PDF: 2 columns
-      const colW = 250;
-      const imgH = 170; // keep readable; office can zoom
-      let x = L;
-      let rowCount = 0;
-
-      for (let i=0; i<refs.length; i++){
-        const rec = await getPhoto(refs[i].id);
-        if (!rec?.blob) continue;
-
-        const dataUrl = await blobToDataURL(rec.blob);
-
-        if (y + imgH > 790){
-          doc.addPage();
-          y = 44;
-        }
-
-        doc.addImage(dataUrl, "JPEG", x, y, colW, imgH);
-
-        x += (colW + 15);
-        rowCount++;
-
-        // new row after 2 images
-        if (rowCount % 2 === 0){
-          x = L;
-          y += (imgH + 18);
-        }
-      }
-
-      // If we ended mid-row, move y down
-      if (rowCount % 2 !== 0){
-        x = L;
-        y += (imgH + 18);
-      }
-    }
-
-    await addPhotoSection("Pre Photos", "pre");
-    await addPhotoSection("Issue Photos", "issue");
-    await addPhotoSection("Final Photos", "final");
-
-    doc.save(pdfFileName());
-
-    // Clear after export (as requested)
-    await clearDay(true);
-  }
-
-  // ---------- Clear day ----------
-  async function clearDay(fromExport){
-    localStorage.removeItem(dayKey);
-    localStorage.removeItem(lastKey);
-
-    state.meta.installer = "";
-    state.meta.jobNumber = "JB";
-    state.meta.rooms = "";
-    state.meta.notes = "";
-    state.answers = {};
-    state.photos = { pre:[], issue:[], final:[] };
-
-    await clearAllPhotos();
-
-    $("installer").value = "";
-    $("jobNumber").value = "JB";
-    $("rooms").value = "";
-    $("notes").value = "";
-
-    renderChecklist();
-    await renderPhotoGrid("pre");
-    await renderPhotoGrid("issue");
-    await renderPhotoGrid("final");
-
-    setStatus(fromExport ? "Exported & Cleared" : "Cleared");
-    saveState();
-  }
-
-  // ---------- Init ----------
-  $("dateHuman").value = humanDate();
-
-  // Theme
-  const themeKey = "installer_daily:theme";
-  const savedTheme = localStorage.getItem(themeKey) || "light";
-  if (savedTheme === "dark") document.body.classList.add("dark");
-  $("modeBtn").addEventListener("click", () => {
-    document.body.classList.toggle("dark");
-    localStorage.setItem(themeKey, document.body.classList.contains("dark") ? "dark" : "light");
-    setStatus("Saved");
-  });
-
-  // Load previous today
-  loadState();
-
-  // Apply loaded meta to UI
-  $("installer").value = state.meta.installer || "";
-  $("jobNumber").value = enforceJBUpper(state.meta.jobNumber || "JB");
-  $("rooms").value = state.meta.rooms || "";
-  $("notes").value = state.meta.notes || "";
-
-  // Autosave events
-  $("installer").addEventListener("change", saveState);
-  $("jobNumber").addEventListener("input", (e) => { e.target.value = enforceJBUpper(e.target.value); saveState(); });
-  $("rooms").addEventListener("input", saveState);
-  $("notes").addEventListener("input", saveState);
-
-  // Photos inputs
-  $("preInput").addEventListener("change", async (e) => {
-    await addPhotos("pre", e.target.files);
-    e.target.value = "";
-  });
-  $("issueInput").addEventListener("change", async (e) => {
-    await addPhotos("issue", e.target.files);
-    e.target.value = "";
-  });
-  $("finalInput").addEventListener("change", async (e) => {
-    await addPhotos("final", e.target.files);
-    e.target.value = "";
-  });
-
-  // Checklist + photo render
-  renderChecklist();
-  (async () => {
-    await renderPhotoGrid("pre");
-    await renderPhotoGrid("issue");
-    await renderPhotoGrid("final");
-    setStatus("Saved");
-  })();
-
-  // Export / Clear
-  $("exportBtn").addEventListener("click", exportPDF);
-  $("clearBtn").addEventListener("click", async () => {
-    if (!confirm("Clear today’s report on this device?")) return;
-    await clearDay(false);
-  });
-
-  // SW
-  if ("serviceWorker" in navigator){
-    navigator.serviceWorker.register("service-worker.js").catch(()=>{});
-  }
-})();
+const QUESTIONS=[
+["Prior damage to walls / area?","Yes"],
+["Prior damage to cabinetry?","Yes"],
+["Access issues?","Yes"],
+["Site issues?","Yes"],
+["Was installation delayed?","Yes"],
+["Wall dimensions correct?","No"],
+["Bulkheads / kickboards correct?","No"],
+["Doors / drawers operating correctly?","No"],
+["Cabinet build correct?","No","builder"],
+["Hardware missing?","Yes"],
+["Hardware incorrect?","Yes"],
+["Handles fitted / correct?","No"],
+["Bump-ons fitted?","No"],
+["Plastic legs incorrect?","Yes"],
+["Pull-out / lighting issues?","Yes"],
+["Return visit required?","Yes"],
+["Dispute / builder claim risk?","Yes"]
+];
+
+const photos={pre:[],issue:[],final:[]};
+document.getElementById("date").value=new Date().toLocaleDateString();
+
+document.getElementById("job").oninput=e=>{
+let v=e.target.value||"";
+if(v.length>=2)v="JB"+v.slice(2);
+e.target.value=v.toUpperCase();
+};
+
+const checklist=document.getElementById("checklist");
+QUESTIONS.forEach((q,i)=>{
+const d=document.createElement("div");
+d.className="q";
+d.innerHTML=`${i+1}. ${q[0]}
+<div class="choice">
+<input type="radio" name="q${i}" value="Yes" id="y${i}">
+<label class="y" for="y${i}">Yes</label>
+<input type="radio" name="q${i}" value="No" id="n${i}">
+<label class="n" for="n${i}">No</label>
+</div>
+<div class="follow">
+${q[2]==="builder" ? `<input placeholder="Built by">` : ""}
+<textarea placeholder="Issue / Comment"></textarea>
+</div>`;
+checklist.appendChild(d);
+
+const follow=d.querySelector(".follow");
+d.querySelectorAll("input[type=radio]").forEach(r=>{
+r.onchange=()=>follow.style.display=(r.value===q[1])?"block":"none";
+});
+});
+
+["pre","issue","final"].forEach(k=>{
+document.getElementById(k).onchange=e=>{
+Array.from(e.target.files).forEach(f=>photos[k].push(f));
+renderPhotos();
+};
+});
+
+function renderPhotos(){
+["pre","issue","final"].forEach(k=>{
+const g=document.getElementById(k+"Grid");
+g.innerHTML="";
+photos[k].forEach(f=>{
+const img=document.createElement("img");
+img.src=URL.createObjectURL(f);
+g.appendChild(img);
+});
+});
+}
+
+function toggleMode(){document.body.classList.toggle("dark")}
+
+async function exportZIP(){
+const zip=new JSZip();
+const job=jobNumber();
+const base=`${job} – ${rooms.value} – ${installer.value} – ${date.value}`;
+
+const {jsPDF}=window.jspdf;
+const doc=new jsPDF();
+let y=10;
+doc.text(`Job: ${job}`,10,y);y+=8;
+doc.text(`Rooms: ${rooms.value}`,10,y);y+=8;
+doc.text(`Installer: ${installer.value}`,10,y);y+=8;
+doc.text(`Date: ${date.value}`,10,y);y+=10;
+
+document.querySelectorAll(".q").forEach(q=>{
+doc.text(q.innerText,10,y);y+=8;
+});
+
+zip.file("Daily Report.pdf",doc.output("arraybuffer"));
+
+["pre","issue","final"].forEach(k=>{
+const folder=zip.folder(`Photos – ${k[0].toUpperCase()+k.slice(1)}`);
+photos[k].forEach((f,i)=>folder.file(`${k}_${i+1}.jpg`,f));
+});
+
+zip.generateAsync({type:"blob"}).then(b=>{
+const a=document.createElement("a");
+a.href=URL.createObjectURL(b);
+a.download=base+".zip";
+a.click();
+location.reload();
+});
+}
+
+function jobNumber(){return document.getElementById("job").value||"JB";}
 </script>
 </body>
 </html>
