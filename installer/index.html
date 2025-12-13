@@ -126,9 +126,13 @@ textarea{min-height:80px}
   max-width:1000px;
   margin:auto;
   display:flex;
-  justify-content:space-between;
+  justify-content:flex-end;
 }
-.toggle{cursor:pointer;font-weight:900;text-decoration:underline}
+.toggle{
+  cursor:pointer;
+  font-weight:900;
+  text-decoration:underline;
+}
 </style>
 </head>
 
@@ -155,26 +159,38 @@ textarea{min-height:80px}
 
 <div style="margin-top:10px">
 <label>Installed Rooms</label>
-<input id="rooms">
+<input id="rooms" placeholder="Kitchen, Laundry, Vanities">
 </div>
 </div>
 
-<!-- PHOTOS -->
+<!-- PRE PHOTOS -->
 <div class="card">
-<label class="btn secondary">Add Pre Photos<input type="file" id="pre" accept="image/*" multiple hidden></label>
+<label class="btn secondary">
+Add Pre Photos
+<input type="file" id="pre" accept="image/*" capture="environment" multiple hidden>
+</label>
 <div id="preGrid" class="photoGrid"></div>
 </div>
 
+<!-- ISSUE PHOTOS -->
 <div class="card">
-<label class="btn secondary">Add Issue Photos<input type="file" id="issue" accept="image/*" multiple hidden></label>
+<label class="btn secondary">
+Add Issue Photos
+<input type="file" id="issue" accept="image/*" capture="environment" multiple hidden>
+</label>
 <div id="issueGrid" class="photoGrid"></div>
 </div>
 
+<!-- FINAL PHOTOS -->
 <div class="card">
-<label class="btn secondary">Add Final Photos<input type="file" id="final" accept="image/*" multiple hidden></label>
+<label class="btn secondary">
+Add Final Photos
+<input type="file" id="final" accept="image/*" capture="environment" multiple hidden>
+</label>
 <div id="finalGrid" class="photoGrid"></div>
 </div>
 
+<!-- CHECKLIST -->
 <div class="card">
 <b>Checklist</b>
 <div id="checklist"></div>
@@ -183,7 +199,6 @@ textarea{min-height:80px}
 
 <div class="bottom">
 <div class="bottomInner">
-<div></div>
 <button class="btn" onclick="exportZIP()">Finish & Export ZIP</button>
 </div>
 </div>
@@ -268,50 +283,68 @@ function renderPhotos(){
 const g=document.getElementById(k+"Grid");
 g.innerHTML="";
 thumbs[k].forEach(t=>{
-const div=document.createElement("div");
-div.className="thumb";
-div.innerHTML=`<img src="${t}">`;
-g.appendChild(div);
+const d=document.createElement("div");
+d.className="thumb";
+d.innerHTML=`<img src="${t}">`;
+g.appendChild(d);
 });
 });
 }
 
-function toggleMode(){document.body.classList.toggle("dark")}
+function toggleMode(){
+document.body.classList.toggle("dark");
+}
 
 async function exportZIP(){
+try{
 const zip=new JSZip();
-const job=jobNumber();
-const base=`${job} – ${rooms.value} – ${installer.value} – ${date.value}`;
+const job=document.getElementById("job").value||"JB";
+const base=`${job} – ${rooms.value||"Rooms"} – ${installer.value||"Installer"} – ${date.value}`;
 
 const {jsPDF}=window.jspdf;
 const doc=new jsPDF();
 let y=10;
+
 doc.text(`Job: ${job}`,10,y);y+=8;
 doc.text(`Rooms: ${rooms.value}`,10,y);y+=8;
 doc.text(`Installer: ${installer.value}`,10,y);y+=8;
 doc.text(`Date: ${date.value}`,10,y);y+=10;
 
 document.querySelectorAll(".q").forEach(q=>{
-doc.text(q.innerText,10,y);y+=8;
+doc.text(q.innerText,10,y);
+y+=8;
+if(y>280){doc.addPage();y=10;}
 });
 
 zip.file("Daily Report.pdf",doc.output("arraybuffer"));
 
 ["pre","issue","final"].forEach(k=>{
-const folder=zip.folder(`Photos – ${k[0].toUpperCase()+k.slice(1)}`);
-photos[k].forEach((f,i)=>folder.file(`${k}_${i+1}.jpg`,f));
+const folder=zip.folder(`Photos – ${k.charAt(0).toUpperCase()+k.slice(1)}`);
+photos[k].forEach((f,i)=>{
+folder.file(`${k}_${String(i+1).padStart(2,"0")}.jpg`,f);
+});
 });
 
-zip.generateAsync({type:"blob"}).then(b=>{
+const blob=await zip.generateAsync({type:"blob"});
 const a=document.createElement("a");
-a.href=URL.createObjectURL(b);
+a.href=URL.createObjectURL(blob);
 a.download=base+".zip";
+document.body.appendChild(a);
 a.click();
+document.body.removeChild(a);
+URL.revokeObjectURL(a.href);
+
+seenAlert();
 location.reload();
-});
+}catch(e){
+alert("Export failed. Try again.");
+console.error(e);
+}
 }
 
-function jobNumber(){return document.getElementById("job").value||"JB";}
+function seenAlert(){
+alert("ZIP exported successfully");
+}
 </script>
 </body>
 </html>
