@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Installer Daily Report</title>
 
 <link rel="manifest" href="manifest.json">
@@ -12,647 +12,189 @@
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
 <style>
-  :root{
-    --bg:#ffffff;
-    --card:#ffffff;
-    --border:#dbe2f0;
-    --blue:#0b5ed7;
-    --text:#000000;
-    --muted:#4b5563;
-    --good:#16a34a;
-    --bad:#dc2626;
-  }
-
-  *{ box-sizing:border-box; }
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--text);
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight:700;
-  }
-
-  .wrap{
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 16px 16px 150px;
-  }
-
-  h1{
-    margin: 0 0 10px;
-    font-weight: 900;
-    letter-spacing: .2px;
-  }
-
-  .card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px;
-    margin-bottom: 14px;
-  }
-
-  .row{
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 12px;
-  }
-
-  label{
-    display:block;
-    font-weight:900;
-    margin-bottom:6px;
-  }
-
-  input, select, textarea{
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    font-weight: 800;
-    font-size: 1.05rem;
-    background:#fff;
-    color:#000;
-  }
-  textarea{ min-height: 80px; resize: vertical; }
-
-  .btn{
-    appearance:none;
-    border:none;
-    background: var(--blue);
-    color:#fff;
-    font-weight:900;
-    border-radius:999px;
-    padding: 14px 18px;
-    cursor:pointer;
-    user-select:none;
-  }
-  .btn.secondary{
-    background:#e8f0fe;
-    color:var(--blue);
-  }
-  .btn.small{
-    padding: 10px 14px;
-    font-size: .95rem;
-  }
-  .btn:disabled{
-    opacity:.6;
-    cursor:not-allowed;
-  }
-
-  .photoGrid{
-    display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
-    gap: 10px;
-    margin-top: 10px;
-  }
-  .thumb{
-    border:1px solid var(--border);
-    border-radius: 10px;
-    overflow:hidden;
-    background:#fff;
-  }
-  .thumb img{
-    width: 100%;
-    height: 80px;
-    object-fit: cover;
-    display:block;
-  }
-
-  .q{
-    border:1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px;
-    margin-top: 12px;
-  }
-  .qTitle{
-    font-weight: 900;
-    margin-bottom: 8px;
-  }
-
-  .choice{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .choice input[type="radio"]{ display:none; }
-
-  .pill{
-    border-radius: 999px;
-    border: 2px solid var(--border);
-    padding: 14px;
-    text-align:center;
-    cursor:pointer;
-    font-weight: 900;
-    background:#fff;
-    user-select:none;
-  }
-
-  .choice input:checked + .pill.goodSel{
-    border-color: var(--good);
-    background: #dcfce7;
-  }
-  .choice input:checked + .pill.badSel{
-    border-color: var(--bad);
-    background: #fee2e2;
-  }
-
-  .follow{
-    display:none;
-    margin-top: 10px;
-  }
-  .follow .hint{
-    font-weight:900;
-    color: var(--muted);
-    margin: 0 0 8px;
-  }
-
-  /* Modal */
-  .modalBackdrop{
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.45);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding: 18px;
-    z-index: 9999;
-  }
-  .modal{
-    width: min(520px, 100%);
-    background:#fff;
-    color:#000;
-    border-radius: 16px;
-    border:1px solid #e5e7eb;
-    padding: 16px;
-  }
-  .modal h2{
-    margin:0 0 10px;
-    font-size: 1.15rem;
-    font-weight: 900;
-  }
-  .modal .modalRow{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 12px;
-  }
-  .modal .modalRow .btn{
-    width:100%;
-  }
-  .modal .closeRow{
-    margin-top: 10px;
-    display:flex;
-    justify-content:flex-end;
-  }
-
-  /* Bottom bar */
-  .bottom{
-    position: fixed;
-    left:0; right:0; bottom:0;
-    background: #fff;
-    border-top: 1px solid var(--border);
-    padding: 10px;
-    z-index: 1000;
-  }
-  .bottomInner{
-    max-width: 1000px;
-    margin: 0 auto;
-    display:flex;
-    justify-content: flex-end;
-    gap: 10px;
-    align-items:center;
-  }
-
-  .status{
-    font-weight:900;
-    color: var(--muted);
-  }
+body{margin:0;font-family:Arial,Helvetica,sans-serif;font-weight:700;background:#fff;color:#000}
+.wrap{max-width:1000px;margin:auto;padding:16px 16px 160px}
+h1{margin:0 0 10px;font-weight:900}
+.card{border:1px solid #dbe2f0;border-radius:14px;padding:14px;margin-bottom:14px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+label{font-weight:900;margin-bottom:6px;display:block}
+input,select,textarea{width:100%;padding:14px;border-radius:12px;border:1px solid #dbe2f0;font-weight:800;font-size:1.05rem}
+textarea{min-height:80px}
+.btn{background:#0b5ed7;color:#fff;border:none;border-radius:999px;padding:14px 18px;font-weight:900}
+.btn.secondary{background:#e8f0fe;color:#0b5ed7}
+.btn:disabled{opacity:.6}
+.photoGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:10px;margin-top:10px}
+.thumb{border:1px solid #dbe2f0;border-radius:10px;overflow:hidden}
+.thumb img{width:100%;height:80px;object-fit:cover}
+.q{border:1px solid #dbe2f0;border-radius:12px;padding:12px;margin-top:12px}
+.qTitle{font-weight:900;margin-bottom:8px}
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.choice input{display:none}
+.pill{border-radius:999px;border:2px solid #dbe2f0;padding:14px;text-align:center;font-weight:900}
+.choice input:checked+.good{background:#dcfce7;border-color:#16a34a}
+.choice input:checked+.bad{background:#fee2e2;border-color:#dc2626}
+.follow{display:none;margin-top:10px}
+.bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #dbe2f0;padding:10px}
+.bottomInner{max-width:1000px;margin:auto;display:flex;justify-content:flex-end;gap:12px}
+.status{font-weight:900;color:#4b5563}
 </style>
 </head>
 
 <body>
 <div class="wrap">
-  <h1>Installer Daily Report</h1>
+<h1>Installer Daily Report</h1>
 
-  <div class="card">
-    <div class="row">
-      <div>
-        <label>Date</label>
-        <input id="date" readonly>
-      </div>
-
-      <div>
-        <label>Installer</label>
-        <select id="installer">
-          <option value="">Select</option>
-          <option>Installer 1</option>
-          <option>Installer 2</option>
-          <option>Installer 3</option>
-          <option>Installer 4</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Job Number</label>
-        <input id="job" value="JB">
-      </div>
-    </div>
-
-    <div style="margin-top:10px">
-      <label>Installed Rooms</label>
-      <input id="rooms" placeholder="Kitchen, Laundry, Vanities">
-    </div>
-  </div>
-
-  <!-- Photos -->
-  <div class="card">
-    <label>Pre Photos</label>
-    <button class="btn secondary" type="button" onclick="openPhotoChoice('pre')">Add Pre Photos</button>
-    <div id="preGrid" class="photoGrid"></div>
-  </div>
-
-  <div class="card">
-    <label>Issue Photos</label>
-    <button class="btn secondary" type="button" onclick="openPhotoChoice('issue')">Add Issue Photos</button>
-    <div id="issueGrid" class="photoGrid"></div>
-  </div>
-
-  <div class="card">
-    <label>Final Photos</label>
-    <button class="btn secondary" type="button" onclick="openPhotoChoice('final')">Add Final Photos</button>
-    <div id="finalGrid" class="photoGrid"></div>
-  </div>
-
-  <!-- Checklist -->
-  <div class="card">
-    <div style="font-weight:900;">Checklist</div>
-    <div id="checklist"></div>
-  </div>
+<div class="card">
+<div class="row">
+<div><label>Date</label><input id="date" readonly></div>
+<div>
+<label>Installer</label>
+<select id="installer">
+<option value="">Select</option>
+<option>Installer 1</option>
+<option>Installer 2</option>
+<option>Installer 3</option>
+<option>Installer 4</option>
+</select>
+</div>
+<div><label>Job Number</label><input id="job" value="JB"></div>
+</div>
+<div style="margin-top:10px">
+<label>Installed Rooms</label>
+<input id="rooms">
+</div>
 </div>
 
-<!-- Bottom Export -->
+<div class="card">
+<label>Pre Photos</label>
+<input type="file" accept="image/*" multiple onchange="addPhotos(event,'pre')">
+<div id="preGrid" class="photoGrid"></div>
+</div>
+
+<div class="card">
+<label>Issue Photos</label>
+<input type="file" accept="image/*" multiple onchange="addPhotos(event,'issue')">
+<div id="issueGrid" class="photoGrid"></div>
+</div>
+
+<div class="card">
+<label>Final Photos</label>
+<input type="file" accept="image/*" multiple onchange="addPhotos(event,'final')">
+<div id="finalGrid" class="photoGrid"></div>
+</div>
+
+<div class="card">
+<b>Checklist</b>
+<div id="checklist"></div>
+</div>
+</div>
+
 <div class="bottom">
-  <div class="bottomInner">
-    <div id="exportStatus" class="status"></div>
-    <button id="exportBtn" class="btn" type="button" onclick="exportZIP()">Finish & Export ZIP</button>
-  </div>
+<div class="bottomInner">
+<div id="status" class="status"></div>
+<button id="exportBtn" class="btn" onclick="exportZIP()">Finish & Share ZIP</button>
 </div>
-
-<!-- Hidden inputs for Camera vs Gallery -->
-<input id="camInput" type="file" accept="image/*" capture="environment" multiple hidden>
-<input id="galInput" type="file" accept="image/*" multiple hidden>
-
-<!-- Photo choice modal -->
-<div id="modalBackdrop" class="modalBackdrop" onclick="closeModal()">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h2 id="modalTitle">Add Photos</h2>
-    <div class="modalRow">
-      <button class="btn" type="button" onclick="chooseCamera()">Camera</button>
-      <button class="btn secondary" type="button" onclick="chooseGallery()">Gallery</button>
-    </div>
-    <div class="closeRow">
-      <button class="btn secondary small" type="button" onclick="forceCloseModal()">Close</button>
-    </div>
-  </div>
 </div>
 
 <script>
-/** -----------------------------
- *  Question rules (unchanged)
- *  ----------------------------- */
-const QUESTION_DEFS = [
-  { text: "Prior damage to walls / area?",            goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" },
-  { text: "Prior damage to cabinetry?",               goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" },
-  { text: "Access issues?",                           goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" },
-  { text: "Site issues?",                             goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" },
-  { text: "Was installation delayed?",                goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" },
-
-  { text: "Wall dimensions correct?",                 goodAnswer: "Yes", badAnswer: "No",  commentOn: "No"  },
-  { text: "Bulkheads / kickboards correct?",          goodAnswer: "Yes", badAnswer: "No",  commentOn: "No"  },
-  { text: "Doors / drawers operating correctly?",     goodAnswer: "Yes", badAnswer: "No",  commentOn: "No"  },
-
-  { text: "Cabinet build correct?",                   goodAnswer: "Yes", badAnswer: "No",  commentOn: "No",  special: "build" },
-
-  { text: "Cabinetry missing?",                       goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" },
-
-  { text: "Hardware missing?",                        goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" },
-  { text: "Hardware incorrect?",                      goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" },
-  { text: "Handles fitted / correct?",                goodAnswer: "Yes", badAnswer: "No",  commentOn: "No"  },
-  { text: "Bump-ons fitted?",                         goodAnswer: "Yes", badAnswer: "No",  commentOn: "No"  },
-
-  { text: "Plastic legs incorrect?",                  goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" },
-
-  { text: "Pull-out / lighting issues?",              goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" },
-  { text: "Return visit required?",                   goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" },
-  { text: "Dispute / builder claim risk?",            goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" }
+const QUESTION_DEFS=[
+{t:"Prior damage to walls / area?",bad:"Yes"},
+{t:"Prior damage to cabinetry?",bad:"Yes"},
+{t:"Access issues?",bad:"Yes"},
+{t:"Site issues?",bad:"Yes"},
+{t:"Was installation delayed?",bad:"Yes"},
+{t:"Wall dimensions correct?",bad:"No"},
+{t:"Bulkheads / kickboards correct?",bad:"No"},
+{t:"Doors / drawers operating correctly?",bad:"No"},
+{t:"Cabinet build correct?",bad:"No",build:true},
+{t:"Cabinetry missing?",bad:"Yes"},
+{t:"Hardware missing?",bad:"Yes"},
+{t:"Hardware incorrect?",bad:"Yes"},
+{t:"Handles fitted / correct?",bad:"No"},
+{t:"Bump-ons fitted?",bad:"No"},
+{t:"Plastic legs incorrect?",bad:"Yes"},
+{t:"Pull-out / lighting issues?",bad:"Yes"},
+{t:"Return visit required?",bad:"Yes"},
+{t:"Dispute / builder claim risk?",bad:"Yes"}
 ];
 
-/** Elements */
-const jobEl = document.getElementById("job");
-const roomsEl = document.getElementById("rooms");
-const installerEl = document.getElementById("installer");
-const dateEl = document.getElementById("date");
-const checklistEl = document.getElementById("checklist");
-const exportBtn = document.getElementById("exportBtn");
-const exportStatus = document.getElementById("exportStatus");
+const photos={pre:[],issue:[],final:[]};
 
-dateEl.value = new Date().toLocaleDateString();
+date.value=new Date().toLocaleDateString();
 
-jobEl.addEventListener("input", () => {
-  let v = (jobEl.value || "").toUpperCase();
-  if (!v.startsWith("JB")) v = "JB" + v.replace(/[^0-9]/g, "");
-  const digits = v.slice(2).replace(/[^0-9]/g, "");
-  jobEl.value = ("JB" + digits).toUpperCase();
-});
-
-/** State */
-const photos = { pre: [], issue: [], final: [] };
-const thumbs = { pre: [], issue: [], final: [] };
-let activePhotoBucket = "pre";
-
-/** Build checklist */
 function buildChecklist(){
-  checklistEl.innerHTML = "";
-
-  QUESTION_DEFS.forEach((q, idx) => {
-    const qWrap = document.createElement("div");
-    qWrap.className = "q";
-    qWrap.dataset.index = String(idx);
-
-    const title = document.createElement("div");
-    title.className = "qTitle";
-    title.textContent = `${idx + 1}. ${q.text}`;
-    qWrap.appendChild(title);
-
-    const choice = document.createElement("div");
-    choice.className = "choice";
-
-    const yesIsBad = q.badAnswer === "Yes";
-    const noIsBad  = q.badAnswer === "No";
-
-    const yesId = `q${idx}_yes`;
-    const noId  = `q${idx}_no`;
-
-    const yesRadio = document.createElement("input");
-    yesRadio.type = "radio";
-    yesRadio.name = `q${idx}`;
-    yesRadio.value = "Yes";
-    yesRadio.id = yesId;
-
-    const yesLabel = document.createElement("label");
-    yesLabel.className = "pill " + (yesIsBad ? "badSel" : "goodSel");
-    yesLabel.setAttribute("for", yesId);
-    yesLabel.textContent = "Yes";
-
-    const noRadio = document.createElement("input");
-    noRadio.type = "radio";
-    noRadio.name = `q${idx}`;
-    noRadio.value = "No";
-    noRadio.id = noId;
-
-    const noLabel = document.createElement("label");
-    noLabel.className = "pill " + (noIsBad ? "badSel" : "goodSel");
-    noLabel.setAttribute("for", noId);
-    noLabel.textContent = "No";
-
-    choice.appendChild(yesRadio);
-    choice.appendChild(yesLabel);
-    choice.appendChild(noRadio);
-    choice.appendChild(noLabel);
-    qWrap.appendChild(choice);
-
-    const follow = document.createElement("div");
-    follow.className = "follow";
-
-    if(q.special === "build"){
-      follow.innerHTML = `
-        <div class="hint">Required when answer is <b>${q.commentOn}</b></div>
-        <input class="builtBy" placeholder="Built by (name / bench / colour)">
-        <textarea class="issueText" placeholder="Issue"></textarea>
-      `;
-    } else {
-      follow.innerHTML = `
-        <div class="hint">Required when answer is <b>${q.commentOn}</b></div>
-        <textarea class="commentText" placeholder="Comment"></textarea>
-      `;
-    }
-    qWrap.appendChild(follow);
-
-    function syncFollow(){
-      const selected = qWrap.querySelector(`input[name="q${idx}"]:checked`);
-      const val = selected ? selected.value : null;
-      follow.style.display = (val === q.commentOn) ? "block" : "none";
-    }
-    yesRadio.addEventListener("change", syncFollow);
-    noRadio.addEventListener("change", syncFollow);
-
-    checklistEl.appendChild(qWrap);
-  });
+QUESTION_DEFS.forEach((q,i)=>{
+const d=document.createElement("div");
+d.className="q";
+d.innerHTML=`<div class="qTitle">${i+1}. ${q.t}</div>`;
+const c=document.createElement("div");c.className="choice";
+["Yes","No"].forEach(v=>{
+const id=`q${i}${v}`;
+c.innerHTML+=`
+<input type="radio" name="q${i}" id="${id}" value="${v}">
+<label for="${id}" class="pill ${v===q.bad?"bad":"good"}">${v}</label>`;
+});
+d.appendChild(c);
+if(q.build){
+const f=document.createElement("div");
+f.className="follow";
+f.innerHTML=`<input placeholder="Built by"><textarea placeholder="Issue"></textarea>`;
+d.appendChild(f);
+}
+checklist.appendChild(d);
+});
 }
 buildChecklist();
 
-/** Photo chooser modal */
-const modalBackdrop = document.getElementById("modalBackdrop");
-const modalTitle = document.getElementById("modalTitle");
-const camInput = document.getElementById("camInput");
-const galInput = document.getElementById("galInput");
-
-function openPhotoChoice(bucket){
-  activePhotoBucket = bucket;
-  modalTitle.textContent =
-    bucket === "pre" ? "Add Pre Photos" :
-    bucket === "issue" ? "Add Issue Photos" : "Add Final Photos";
-  modalBackdrop.style.display = "flex";
-}
-function closeModal(){ modalBackdrop.style.display = "none"; }
-function forceCloseModal(){ modalBackdrop.style.display = "none"; }
-function chooseCamera(){ closeModal(); camInput.click(); }
-function chooseGallery(){ closeModal(); galInput.click(); }
-
-camInput.addEventListener("change", async (e) => {
-  await handleFiles(e.target.files);
-  camInput.value = "";
+function addPhotos(e,b){
+[...e.target.files].forEach(f=>{
+photos[b].push(f);
+const img=document.createElement("img");
+img.src=URL.createObjectURL(f);
+const d=document.createElement("div");
+d.className="thumb";d.appendChild(img);
+document.getElementById(b+"Grid").appendChild(d);
 });
-galInput.addEventListener("change", async (e) => {
-  await handleFiles(e.target.files);
-  galInput.value = "";
-});
-
-/** Thumbnails */
-async function makeThumb(file){
-  const img = await createImageBitmap(file);
-  const targetW = 140;
-  const scale = targetW / img.width;
-  const canvas = document.createElement("canvas");
-  canvas.width = targetW;
-  canvas.height = Math.max(1, Math.round(img.height * scale));
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  if (img && typeof img.close === "function") img.close();
-  return canvas.toDataURL("image/jpeg", 0.65);
 }
 
-async function handleFiles(fileList){
-  if(!fileList || !fileList.length) return;
-  for(const f of Array.from(fileList)){
-    photos[activePhotoBucket].push(f);
-    thumbs[activePhotoBucket].push(await makeThumb(f));
-  }
-  renderPhotoGrids();
-}
-
-function renderPhotoGrids(){
-  ["pre","issue","final"].forEach(renderGrid);
-}
-function renderGrid(bucket){
-  const grid = document.getElementById(bucket + "Grid");
-  grid.innerHTML = "";
-  thumbs[bucket].forEach((src) => {
-    const d = document.createElement("div");
-    d.className = "thumb";
-    d.innerHTML = `<img src="${src}" alt="">`;
-    grid.appendChild(d);
-  });
-}
-
-/** PDF helpers */
-function pdfWriteWrapped(doc, text, x, y, maxW, lineH){
-  const lines = doc.splitTextToSize(text, maxW);
-  doc.text(lines, x, y);
-  return y + (lines.length * lineH);
-}
-
-/** JSON helper */
-function buildJSON(job, installer, rooms, date){
-  const answers = QUESTION_DEFS.map((q, idx) => {
-    const qNode = document.querySelector(`.q[data-index="${idx}"]`);
-    const selected = qNode.querySelector(`input[name="q${idx}"]:checked`);
-    const val = selected ? selected.value : null;
-
-    const out = { number: idx + 1, question: q.text, answer: val, commentRequiredOn: q.commentOn };
-
-    if(val === q.commentOn){
-      if(q.special === "build"){
-        out.builtBy = qNode.querySelector(".builtBy")?.value || "";
-        out.issue = qNode.querySelector(".issueText")?.value || "";
-      } else {
-        out.comment = qNode.querySelector(".commentText")?.value || "";
-      }
-    }
-    return out;
-  });
-
-  return { job, installer, rooms, date, createdAtISO: new Date().toISOString(), answers };
-}
-
-/** EXPORT ZIP (streamed + Android-safe) */
 async function exportZIP(){
-  exportBtn.disabled = true;
-  exportStatus.textContent = "Exporting… (may take a moment)";
+exportBtn.disabled=true;
+status.textContent="Preparing ZIP…";
 
-  try{
-    const job = (jobEl.value || "JB").toUpperCase();
-    const installer = installerEl.value || "Installer";
-    const rooms = roomsEl.value || "";
-    const date = dateEl.value || "";
+try{
+const zip=new JSZip();
+const job=job.value.toUpperCase();
+const dateStr=date.value;
 
-    const zipName = `${job} – ${installer} – ${date}`.replace(/[\/\\:*?"<>|]/g, "-");
-    const zip = new JSZip();
+const pdf=new jspdf.jsPDF();
+pdf.text(`Job: ${job}`,10,10);
+pdf.text(`Rooms: ${rooms.value}`,10,18);
+pdf.text(`Installer: ${installer.value}`,10,26);
+zip.file("Report.pdf",pdf.output("arraybuffer"));
 
-    // PDF
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit:"mm", format:"a4" });
+["pre","issue","final"].forEach(k=>{
+const f=zip.folder("Photos_"+k);
+photos[k].forEach((p,i)=>f.file(`${k}_${i+1}.jpg`,p));
+});
 
-    let y = 12;
-    doc.setFont("helvetica","normal");
-    doc.setFontSize(14);
-    doc.text("Installer Daily Report", 10, y); y += 9;
+const blob=await zip.generateAsync({type:"blob",streamFiles:true,compression:"STORE"});
+const file=new File([blob],`${job}_${dateStr}.zip`,{type:"application/zip"});
 
-    doc.setFontSize(11);
-    doc.text(`Job: ${job}`, 10, y); y += 6;
-    doc.text(`Rooms: ${rooms}`, 10, y); y += 6;
-    doc.text(`Installer: ${installer}`, 10, y); y += 6;
-    doc.text(`Date: ${date}`, 10, y); y += 8;
-
-    doc.setFontSize(10);
-
-    QUESTION_DEFS.forEach((q, idx) => {
-      const qNode = document.querySelector(`.q[data-index="${idx}"]`);
-      const selected = qNode.querySelector(`input[name="q${idx}"]:checked`);
-      const val = selected ? selected.value : "Not answered";
-
-      if(y > 270){ doc.addPage(); y = 12; }
-
-      y = pdfWriteWrapped(doc, `${idx + 1}. ${q.text}`, 10, y, 190, 5);
-      y = pdfWriteWrapped(doc, `Answer: ${val}`, 14, y, 186, 5);
-
-      if(val === q.commentOn){
-        if(q.special === "build"){
-          const builtBy = qNode.querySelector(".builtBy")?.value?.trim() || "";
-          const issue = qNode.querySelector(".issueText")?.value?.trim() || "";
-          if(builtBy) y = pdfWriteWrapped(doc, `Built by: ${builtBy}`, 14, y, 186, 5);
-          if(issue)   y = pdfWriteWrapped(doc, `Issue: ${issue}`, 14, y, 186, 5);
-          if(!builtBy && !issue) y = pdfWriteWrapped(doc, `Comment required (not entered)`, 14, y, 186, 5);
-        } else {
-          const comment = qNode.querySelector(".commentText")?.value?.trim() || "";
-          if(comment) y = pdfWriteWrapped(doc, `Comment: ${comment}`, 14, y, 186, 5);
-          else y = pdfWriteWrapped(doc, `Comment required (not entered)`, 14, y, 186, 5);
-        }
-      }
-      y += 2;
-    });
-
-    zip.file("Daily Report.pdf", doc.output("arraybuffer"));
-
-    // Photos into folders — ✅ FIXED: no {binary:true}
-    const folderMap = [
-      ["pre", "Photos – Pre Install"],
-      ["issue", "Photos – Issues"],
-      ["final", "Photos – Final"]
-    ];
-    folderMap.forEach(([bucket, folderName]) => {
-      const f = zip.folder(folderName);
-      photos[bucket].forEach((file, i) => {
-        const ext = (file.name && file.name.includes(".")) ? file.name.split(".").pop() : "jpg";
-        const safeExt = (ext || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-        const num = String(i + 1).padStart(2, "0");
-        f.file(`${bucket}_${num}.${safeExt}`, file); // ✅ FIXED LINE
-      });
-    });
-
-    zip.file("Report Data.json", JSON.stringify(buildJSON(job, installer, rooms, date), null, 2));
-
-    const blob = await zip.generateAsync({
-      type: "blob",
-      streamFiles: true,
-      compression: "STORE"
-    });
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${zipName}.zip`;
-    document.body.appendChild(a);
-    a.click();
-
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 800);
-
-    exportStatus.textContent = "ZIP exported.";
-    alert("ZIP exported.");
-
-  } catch (err){
-    console.error(err);
-    exportStatus.textContent = "";
-    alert("Export failed. Try again.");
-  } finally {
-    exportBtn.disabled = false;
-    setTimeout(()=>{ exportStatus.textContent = ""; }, 2500);
-  }
+if(navigator.share){
+await navigator.share({
+files:[file],
+title:"Installer Report",
+text:"Daily installer report"
+});
+status.textContent="Shared successfully";
+}else{
+alert("Sharing not supported on this device");
+}
+}catch(e){
+console.error(e);
+alert("Export failed");
+}
+exportBtn.disabled=false;
 }
 </script>
 </body>
