@@ -359,9 +359,7 @@ function toggleTheme(){
   applyTheme(saved);
 })();
 
-/* ---------------- Questions (unchanged) ----------------
-   commentOn is the answer that must show comments.
-*/
+/* ---------------- Questions (commentOn is the answer that must show comments) ---------------- */
 const QUESTION_DEFS = [
   { text: "Prior damage to walls / area?",            badAnswer: "Yes", commentOn: "Yes" },
   { text: "Prior damage to cabinetry?",               badAnswer: "Yes", commentOn: "Yes" },
@@ -413,7 +411,7 @@ const photos = { pre: [], issue: [], final: [] };   // originals
 const thumbs = { pre: [], issue: [], final: [] };   // small dataURLs
 let activePhotoBucket = "pre";
 
-/* ---------------- Checklist build (comment logic) ---------------- */
+/* ---------------- Checklist build ---------------- */
 function buildChecklist(){
   checklistEl.innerHTML = "";
 
@@ -588,7 +586,46 @@ function buildJSON(job, installer, rooms, date){
   return { job, installer, rooms, date, createdAtISO: new Date().toISOString(), answers };
 }
 
-/* ---------------- EXPORT (Share Sheet for home screen app) ---------------- */
+/* ---------------- EXPORT (Option 1: Save picker / Download only) ---------------- */
+function safeFilename(name){
+  return String(name || "")
+    .replace(/[\/\\:*?"<>|]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function saveViaPicker(blob, filename){
+  // File System Access API (now available on Android Chrome in newer versions)
+  if (!window.showSaveFilePicker) return false;
+
+  const opts = {
+    suggestedName: filename,
+    types: [{
+      description: "ZIP archive",
+      accept: { "application/zip": [".zip"] }
+    }]
+  };
+
+  const handle = await window.showSaveFilePicker(opts);
+  const writable = await handle.createWritable();
+  await writable.write(blob);
+  await writable.close();
+  return true;
+}
+
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 1200);
+}
+
 async function exportZIP(){
   exportBtn.disabled = true;
   exportStatus.textContent = "Exporting… (may take a moment)";
@@ -599,7 +636,9 @@ async function exportZIP(){
     const rooms = roomsEl.value || "";
     const date = dateEl.value || "";
 
-    const zipName = `${job} – ${installer} – ${date}`.replace(/[\/\\:*?"<>|]/g, "-");
+    const zipBase = safeFilename(`${job} – ${installer} – ${date}`);
+    const zipFileName = `${zipBase}.zip`;
+
     const zip = new JSZip();
 
     // PDF
@@ -647,7 +686,7 @@ async function exportZIP(){
 
     zip.file("Daily Report.pdf", doc.output("arraybuffer"));
 
-    // Photos — IMPORTANT: no {binary:true} (Android issue)
+    // Photos (originals in ZIP). IMPORTANT: no {binary:true}
     const folderMap = [
       ["pre", "Photos – Pre Install"],
       ["issue", "Photos – Issues"],
@@ -671,50 +710,27 @@ async function exportZIP(){
       compression: "STORE"
     });
 
-    const file = new File([blob], `${zipName}.zip`, { type: "application/zip" });
+    // 1) Best: Save picker (lets them pick Drive if it appears)
+    let saved = false;
+    try{
+      exportStatus.textContent = "Choose where to save…";
+      saved = await saveViaPicker(blob, zipFileName);
+    } catch(e){
+      // If user cancels picker, fall back to download
+      saved = false;
+    }
 
-    // Share Sheet (works in home screen apps)
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-      try{
-        await navigator.share({
-          files: [file],
-          title: `Installer Report ${job}`,
-          text: `${job} – ${date}`
-        });
-        exportStatus.textContent = "Shared.";
-      } catch (shareErr){
-        // If user cancels share, do NOT show "export failed"
-        if (shareErr && (shareErr.name === "AbortError" || shareErr.name === "NotAllowedError")) {
-          exportStatus.textContent = "Share cancelled.";
-          return;
-        }
-        throw shareErr;
-      }
-    } else if (navigator.share) {
-      // Some devices support share but not canShare()
-      try{
-        await navigator.share({ files: [file], title: `Installer Report ${job}`, text: `${job} – ${date}` });
-        exportStatus.textContent = "Shared.";
-      } catch (shareErr){
-        if (shareErr && (shareErr.name === "AbortError" || shareErr.name === "NotAllowedError")) {
-          exportStatus.textContent = "Share cancelled.";
-          return;
-        }
-        throw shareErr;
-      }
+    // 2) Fallback: normal Chrome download
+    if(!saved){
+      exportStatus.textContent = "Starting download…";
+      downloadBlob(blob, zipFileName);
+
+      // You can’t reliably force Chrome to open downloads from JS.
+      // So we show a clear instruction instead of fake “auto-open”.
+      exportStatus.textContent = "Download started. Tap the download bar → Save to Drive.";
+      alert("Download started.\nTap the Chrome download bar, then choose 'Save to Drive'.");
     } else {
-      // Fallback: try download (may fail in PWA on Android)
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${zipName}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 800);
-      exportStatus.textContent = "Downloaded.";
+      exportStatus.textContent = "Saved.";
     }
 
   } catch (err){
@@ -723,7 +739,7 @@ async function exportZIP(){
     alert("Export failed. Try again.");
   } finally {
     exportBtn.disabled = false;
-    setTimeout(()=>{ exportStatus.textContent = ""; }, 2500);
+    setTimeout(()=>{ exportStatus.textContent = ""; }, 3500);
   }
 }
 </script>
