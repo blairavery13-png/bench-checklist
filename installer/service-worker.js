@@ -1,4 +1,4 @@
-const CACHE="installer-zip-v1";
+const CACHE="installer-thumb-v1";
 self.addEventListener("install",e=>{
 self.skipWaiting();
 e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["./","./index.html","./manifest.json"])));
