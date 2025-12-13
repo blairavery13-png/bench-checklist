@@ -76,6 +76,22 @@ textarea{min-height:80px}
   color:var(--text);
   border:2px solid var(--blue);
 }
+.photoGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
+  gap:10px;
+  margin-top:10px;
+}
+.thumb{
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+}
+.thumb img{
+  width:100%;
+  height:90px;
+  object-fit:cover;
+}
 .q{
   border:1px solid var(--border);
   border-radius:12px;
@@ -99,18 +115,6 @@ textarea{min-height:80px}
 .choice input:checked+label.y{background:#dcfce7}
 .choice input:checked+label.n{background:#fee2e2}
 .follow{display:none;margin-top:8px}
-.photoGrid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
-  gap:10px;
-  margin-top:10px;
-}
-.thumb img{
-  width:100%;
-  height:90px;
-  object-fit:cover;
-  border-radius:10px;
-}
 .bottom{
   position:fixed;
   left:0;right:0;bottom:0;
@@ -123,7 +127,6 @@ textarea{min-height:80px}
   margin:auto;
   display:flex;
   justify-content:space-between;
-  gap:10px;
 }
 .toggle{cursor:pointer;font-weight:900;text-decoration:underline}
 </style>
@@ -152,22 +155,23 @@ textarea{min-height:80px}
 
 <div style="margin-top:10px">
 <label>Installed Rooms</label>
-<input id="rooms" placeholder="Kitchen, Laundry, Vanities">
+<input id="rooms">
 </div>
 </div>
 
+<!-- PHOTOS -->
 <div class="card">
-<label class="btn secondary">Add Pre Photos<input type="file" id="pre" multiple hidden></label>
+<label class="btn secondary">Add Pre Photos<input type="file" id="pre" accept="image/*" multiple hidden></label>
 <div id="preGrid" class="photoGrid"></div>
 </div>
 
 <div class="card">
-<label class="btn secondary">Add Issue Photos<input type="file" id="issue" multiple hidden></label>
+<label class="btn secondary">Add Issue Photos<input type="file" id="issue" accept="image/*" multiple hidden></label>
 <div id="issueGrid" class="photoGrid"></div>
 </div>
 
 <div class="card">
-<label class="btn secondary">Add Final Photos<input type="file" id="final" multiple hidden></label>
+<label class="btn secondary">Add Final Photos<input type="file" id="final" accept="image/*" multiple hidden></label>
 <div id="finalGrid" class="photoGrid"></div>
 </div>
 
@@ -206,6 +210,8 @@ const QUESTIONS=[
 ];
 
 const photos={pre:[],issue:[],final:[]};
+const thumbs={pre:[],issue:[],final:[]};
+
 document.getElementById("date").value=new Date().toLocaleDateString();
 
 document.getElementById("job").oninput=e=>{
@@ -237,9 +243,22 @@ r.onchange=()=>follow.style.display=(r.value===q[1])?"block":"none";
 });
 });
 
+async function makeThumb(file){
+const img=await createImageBitmap(file);
+const scale=100/img.width;
+const canvas=document.createElement("canvas");
+canvas.width=100;
+canvas.height=img.height*scale;
+canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
+return canvas.toDataURL("image/jpeg",0.6);
+}
+
 ["pre","issue","final"].forEach(k=>{
-document.getElementById(k).onchange=e=>{
-Array.from(e.target.files).forEach(f=>photos[k].push(f));
+document.getElementById(k).onchange=async e=>{
+for(const f of e.target.files){
+photos[k].push(f);
+thumbs[k].push(await makeThumb(f));
+}
 renderPhotos();
 };
 });
@@ -248,10 +267,11 @@ function renderPhotos(){
 ["pre","issue","final"].forEach(k=>{
 const g=document.getElementById(k+"Grid");
 g.innerHTML="";
-photos[k].forEach(f=>{
-const img=document.createElement("img");
-img.src=URL.createObjectURL(f);
-g.appendChild(img);
+thumbs[k].forEach(t=>{
+const div=document.createElement("div");
+div.className="thumb";
+div.innerHTML=`<img src="${t}">`;
+g.appendChild(div);
 });
 });
 }
