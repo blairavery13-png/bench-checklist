@@ -33,186 +33,168 @@
   .wrap{
     max-width: 1000px;
     margin: 0 auto;
-    padding: 16px 16px 140px;
+    padding: 16px 16px 150px;
   }
-  h1{
-    margin: 0 0 10px;
-    font-weight: 900;
-    letter-spacing: .2px;
-  }
+  h1{ margin:0 0 10px; font-weight:900; }
   .card{
     background:var(--card);
     border:1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px;
-    margin-bottom: 14px;
+    border-radius:14px;
+    padding:14px;
+    margin-bottom:14px;
   }
   .row{
     display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 12px;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:12px;
   }
-  label{
-    display:block;
-    font-weight:900;
-    margin-bottom:6px;
-  }
-  input, select, textarea{
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    font-weight: 800;
-    font-size: 1.05rem;
+  label{ display:block; font-weight:900; margin-bottom:6px; }
+  input,select,textarea{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    font-weight:800;
+    font-size:1.05rem;
     background:#fff;
     color:#000;
   }
-  textarea{ min-height: 80px; resize: vertical; }
+  textarea{ min-height:80px; resize:vertical; }
 
   .btn{
     appearance:none;
     border:none;
-    background: var(--blue);
+    background:var(--blue);
     color:#fff;
     font-weight:900;
     border-radius:999px;
-    padding: 14px 18px;
+    padding:14px 18px;
     cursor:pointer;
     user-select:none;
   }
-  .btn.secondary{
-    background:#e8f0fe;
-    color:var(--blue);
-  }
-  .btn.small{
-    padding: 10px 14px;
-    font-size: .95rem;
+  .btn.secondary{ background:#e8f0fe; color:var(--blue); }
+  .btn.small{ padding:10px 14px; font-size:.95rem; }
+
+  .btn:disabled{
+    opacity:.6;
+    cursor:not-allowed;
   }
 
   .photoGrid{
     display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
-    gap: 10px;
-    margin-top: 10px;
+    grid-template-columns:repeat(auto-fill,minmax(95px,1fr));
+    gap:10px;
+    margin-top:10px;
   }
   .thumb{
     border:1px solid var(--border);
-    border-radius: 10px;
+    border-radius:10px;
     overflow:hidden;
     background:#fff;
   }
   .thumb img{
-    width: 100%;
-    height: 80px;
-    object-fit: cover;
+    width:100%;
+    height:80px;
+    object-fit:cover;
     display:block;
   }
 
   .q{
     border:1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px;
-    margin-top: 12px;
+    border-radius:12px;
+    padding:12px;
+    margin-top:12px;
   }
-  .qTitle{
-    font-weight: 900;
-    margin-bottom: 8px;
-  }
+  .qTitle{ font-weight:900; margin-bottom:8px; }
   .choice{
     display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
   }
   .choice input[type="radio"]{ display:none; }
-
   .pill{
-    border-radius: 999px;
-    border: 2px solid var(--border);
-    padding: 14px;
+    border-radius:999px;
+    border:2px solid var(--border);
+    padding:14px;
     text-align:center;
     cursor:pointer;
-    font-weight: 900;
+    font-weight:900;
     background:#fff;
     user-select:none;
   }
-  /* Selected states */
   .choice input:checked + .pill.goodSel{
-    border-color: var(--good);
-    background: #dcfce7;
+    border-color:var(--good);
+    background:#dcfce7;
   }
   .choice input:checked + .pill.badSel{
-    border-color: var(--bad);
-    background: #fee2e2;
+    border-color:var(--bad);
+    background:#fee2e2;
   }
 
-  .follow{
-    display:none;
-    margin-top: 10px;
-  }
+  .follow{ display:none; margin-top:10px; }
   .follow .hint{
     font-weight:900;
-    color: var(--muted);
-    margin: 0 0 8px;
+    color:var(--muted);
+    margin:0 0 8px;
   }
 
   /* Modal */
   .modalBackdrop{
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.45);
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
     display:none;
     align-items:center;
     justify-content:center;
-    padding: 18px;
-    z-index: 9999;
+    padding:18px;
+    z-index:9999;
   }
   .modal{
-    width: min(520px, 100%);
+    width:min(520px,100%);
     background:#fff;
     color:#000;
-    border-radius: 16px;
+    border-radius:16px;
     border:1px solid #e5e7eb;
-    padding: 16px;
+    padding:16px;
   }
   .modal h2{
     margin:0 0 10px;
-    font-size: 1.15rem;
-    font-weight: 900;
+    font-size:1.15rem;
+    font-weight:900;
   }
-  .modal .modalRow{
+  .modalRow{
     display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 12px;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:12px;
   }
-  .modal .modalRow .btn{ width:100%; }
-  .modal .closeRow{
-    margin-top: 10px;
+  .modalRow .btn{ width:100%; }
+  .closeRow{
+    margin-top:10px;
     display:flex;
     justify-content:flex-end;
   }
 
   /* Bottom bar */
   .bottom{
-    position: fixed;
+    position:fixed;
     left:0; right:0; bottom:0;
-    background: #fff;
-    border-top: 1px solid var(--border);
-    padding: 10px;
-    z-index: 1000;
+    background:#fff;
+    border-top:1px solid var(--border);
+    padding:10px;
+    z-index:1000;
   }
   .bottomInner{
-    max-width: 1000px;
-    margin: 0 auto;
+    max-width:1000px;
+    margin:0 auto;
     display:flex;
-    justify-content: flex-end;
-    gap: 10px;
+    justify-content:flex-end;
+    gap:10px;
+    align-items:center;
   }
-  .mutedNote{
+  .status{
     font-weight:900;
-    color: var(--muted);
-    margin-top: 6px;
-    font-size: .95rem;
+    color:var(--muted);
   }
 </style>
 </head>
@@ -247,11 +229,8 @@
       <label>Installed Rooms</label>
       <input id="rooms" placeholder="Kitchen, Laundry, Vanities">
     </div>
-
-    <div class="mutedNote">Export is allowed even if comments are missed.</div>
   </div>
 
-  <!-- Photos -->
   <div class="card">
     <label>Pre Photos</label>
     <button class="btn secondary" type="button" onclick="openPhotoChoice('pre')">Add Pre Photos</button>
@@ -270,7 +249,6 @@
     <div id="finalGrid" class="photoGrid"></div>
   </div>
 
-  <!-- Checklist -->
   <div class="card">
     <div style="font-weight:900;">Checklist</div>
     <div id="checklist"></div>
@@ -279,11 +257,12 @@
 
 <div class="bottom">
   <div class="bottomInner">
-    <button class="btn" type="button" onclick="exportZIP()">Finish & Export ZIP</button>
+    <div id="exportStatus" class="status"></div>
+    <button id="exportBtn" class="btn" type="button" onclick="exportZIP()">Finish & Export ZIP</button>
   </div>
 </div>
 
-<!-- Hidden file inputs for Camera vs Gallery -->
+<!-- Hidden inputs for Camera vs Gallery -->
 <input id="camInput" type="file" accept="image/*" capture="environment" multiple hidden>
 <input id="galInput" type="file" accept="image/*" multiple hidden>
 
@@ -302,13 +281,7 @@
 </div>
 
 <script>
-/** -----------------------------
- *  Question rules:
- *  goodAnswer = green when selected
- *  badAnswer  = red when selected
- *  commentOn  = the answer that REQUIRES a comment box
- *  special "build" = shows Built by + Issue when badAnswer selected
- *  ----------------------------- */
+/** Question rules */
 const QUESTION_DEFS = [
   { text: "Prior damage to walls / area?",            goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" },
   { text: "Prior damage to cabinetry?",               goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" },
@@ -336,17 +309,17 @@ const QUESTION_DEFS = [
   { text: "Dispute / builder claim risk?",            goodAnswer: "No",  badAnswer: "Yes", commentOn: "Yes" }
 ];
 
-/** -----------------------------
- *  Elements / state
- *  ----------------------------- */
+/** Elements */
 const jobEl = document.getElementById("job");
 const roomsEl = document.getElementById("rooms");
 const installerEl = document.getElementById("installer");
 const dateEl = document.getElementById("date");
 const checklistEl = document.getElementById("checklist");
+const exportBtn = document.getElementById("exportBtn");
+const exportStatus = document.getElementById("exportStatus");
 
+/** Init */
 dateEl.value = new Date().toLocaleDateString();
-
 jobEl.addEventListener("input", () => {
   let v = (jobEl.value || "").toUpperCase();
   if (!v.startsWith("JB")) v = "JB" + v.replace(/[^0-9]/g, "");
@@ -354,25 +327,20 @@ jobEl.addEventListener("input", () => {
   jobEl.value = ("JB" + digits).toUpperCase();
 });
 
-const photos = { pre: [], issue: [], final: [] };   // originals for ZIP
-const thumbs = { pre: [], issue: [], final: [] };   // thumbnails for app
+/** State */
+const photos = { pre: [], issue: [], final: [] };   // originals
+const thumbs = { pre: [], issue: [], final: [] };   // small dataURLs
 let activePhotoBucket = "pre";
 
-/** -----------------------------
- *  Build checklist UI
- *  ----------------------------- */
+/** Build checklist */
 function buildChecklist(){
   checklistEl.innerHTML = "";
-
   QUESTION_DEFS.forEach((q, idx) => {
     const qWrap = document.createElement("div");
     qWrap.className = "q";
     qWrap.dataset.index = String(idx);
 
-    const title = document.createElement("div");
-    title.className = "qTitle";
-    title.textContent = `${idx + 1}. ${q.text}`;
-    qWrap.appendChild(title);
+    qWrap.innerHTML = `<div class="qTitle">${idx + 1}. ${q.text}</div>`;
 
     const choice = document.createElement("div");
     choice.className = "choice";
@@ -383,32 +351,14 @@ function buildChecklist(){
     const yesId = `q${idx}_yes`;
     const noId  = `q${idx}_no`;
 
-    const yesRadio = document.createElement("input");
-    yesRadio.type = "radio";
-    yesRadio.name = `q${idx}`;
-    yesRadio.value = "Yes";
-    yesRadio.id = yesId;
+    choice.innerHTML = `
+      <input type="radio" name="q${idx}" value="Yes" id="${yesId}">
+      <label class="pill ${yesIsBad ? "badSel" : "goodSel"}" for="${yesId}">Yes</label>
 
-    const yesLabel = document.createElement("label");
-    yesLabel.className = "pill " + (yesIsBad ? "badSel" : "goodSel");
-    yesLabel.setAttribute("for", yesId);
-    yesLabel.textContent = "Yes";
+      <input type="radio" name="q${idx}" value="No" id="${noId}">
+      <label class="pill ${noIsBad ? "badSel" : "goodSel"}" for="${noId}">No</label>
+    `;
 
-    const noRadio = document.createElement("input");
-    noRadio.type = "radio";
-    noRadio.name = `q${idx}`;
-    noRadio.value = "No";
-    noRadio.id = noId;
-
-    const noLabel = document.createElement("label");
-    noLabel.className = "pill " + (noIsBad ? "badSel" : "goodSel");
-    noLabel.setAttribute("for", noId);
-    noLabel.textContent = "No";
-
-    choice.appendChild(yesRadio);
-    choice.appendChild(yesLabel);
-    choice.appendChild(noRadio);
-    choice.appendChild(noLabel);
     qWrap.appendChild(choice);
 
     const follow = document.createElement("div");
@@ -428,22 +378,20 @@ function buildChecklist(){
     }
     qWrap.appendChild(follow);
 
+    const radios = qWrap.querySelectorAll(`input[name="q${idx}"]`);
     function syncFollow(){
       const selected = qWrap.querySelector(`input[name="q${idx}"]:checked`);
       const val = selected ? selected.value : null;
       follow.style.display = (val === q.commentOn) ? "block" : "none";
     }
-    yesRadio.addEventListener("change", syncFollow);
-    noRadio.addEventListener("change", syncFollow);
+    radios.forEach(r => r.addEventListener("change", syncFollow));
 
     checklistEl.appendChild(qWrap);
   });
 }
 buildChecklist();
 
-/** -----------------------------
- *  Photo chooser modal
- *  ----------------------------- */
+/** Modal chooser */
 const modalBackdrop = document.getElementById("modalBackdrop");
 const modalTitle = document.getElementById("modalTitle");
 const camInput = document.getElementById("camInput");
@@ -458,28 +406,13 @@ function openPhotoChoice(bucket){
 }
 function closeModal(){ modalBackdrop.style.display = "none"; }
 function forceCloseModal(){ modalBackdrop.style.display = "none"; }
+function chooseCamera(){ closeModal(); camInput.click(); }
+function chooseGallery(){ closeModal(); galInput.click(); }
 
-function chooseCamera(){
-  closeModal();
-  camInput.click();
-}
-function chooseGallery(){
-  closeModal();
-  galInput.click();
-}
+camInput.addEventListener("change", async (e) => { await handleFiles(e.target.files); camInput.value=""; });
+galInput.addEventListener("change", async (e) => { await handleFiles(e.target.files); galInput.value=""; });
 
-camInput.addEventListener("change", async (e) => {
-  await handleFiles(e.target.files);
-  camInput.value = "";
-});
-galInput.addEventListener("change", async (e) => {
-  await handleFiles(e.target.files);
-  galInput.value = "";
-});
-
-/** -----------------------------
- *  Thumbnails: small in app, originals in ZIP
- *  ----------------------------- */
+/** Thumbs */
 async function makeThumb(file){
   const img = await createImageBitmap(file);
   const targetW = 140;
@@ -489,14 +422,16 @@ async function makeThumb(file){
   canvas.height = Math.max(1, Math.round(img.height * scale));
   const ctx = canvas.getContext("2d");
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  // Free bitmap memory on supported browsers
+  if (img && typeof img.close === "function") img.close();
+
   return canvas.toDataURL("image/jpeg", 0.65);
 }
 
 async function handleFiles(fileList){
   if(!fileList || !fileList.length) return;
-  const list = Array.from(fileList);
-
-  for(const f of list){
+  for(const f of Array.from(fileList)){
     photos[activePhotoBucket].push(f);
     thumbs[activePhotoBucket].push(await makeThumb(f));
   }
@@ -517,30 +452,21 @@ function renderGrid(bucket){
   });
 }
 
-/** -----------------------------
- *  PDF helpers
- *  ----------------------------- */
+/** PDF helper */
 function pdfWriteWrapped(doc, text, x, y, maxW, lineH){
   const lines = doc.splitTextToSize(text, maxW);
   doc.text(lines, x, y);
   return y + (lines.length * lineH);
 }
 
-/** -----------------------------
- *  Build JSON (optional)
- *  ----------------------------- */
+/** JSON helper */
 function buildJSON(job, installer, rooms, date){
   const answers = QUESTION_DEFS.map((q, idx) => {
     const qNode = document.querySelector(`.q[data-index="${idx}"]`);
     const selected = qNode.querySelector(`input[name="q${idx}"]:checked`);
     const val = selected ? selected.value : null;
 
-    const out = {
-      number: idx + 1,
-      question: q.text,
-      answer: val,
-      commentRequiredOn: q.commentOn
-    };
+    const out = { number: idx+1, question: q.text, answer: val, commentRequiredOn: q.commentOn };
 
     if(val === q.commentOn){
       if(q.special === "build"){
@@ -553,20 +479,14 @@ function buildJSON(job, installer, rooms, date){
     return out;
   });
 
-  return {
-    job,
-    installer,
-    rooms,
-    date,
-    createdAtISO: new Date().toISOString(),
-    answers
-  };
+  return { job, installer, rooms, date, createdAtISO: new Date().toISOString(), answers };
 }
 
-/** -----------------------------
- *  EXPORT ZIP (fixed + robust)
- *  ----------------------------- */
+/** STREAMED ZIP EXPORT (Android-safe) */
 async function exportZIP(){
+  exportBtn.disabled = true;
+  exportStatus.textContent = "Exporting… (may take a moment)";
+
   try{
     const job = (jobEl.value || "JB").toUpperCase();
     const installer = installerEl.value || "Installer";
@@ -574,19 +494,16 @@ async function exportZIP(){
     const date = dateEl.value || "";
 
     const zipName = `${job} – ${installer} – ${date}`.replace(/[\/\\:*?"<>|]/g, "-");
-
     const zip = new JSZip();
 
-    // PDF
+    // Build PDF
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: "mm", format: "a4" });
+    const doc = new jsPDF({ unit:"mm", format:"a4" });
 
     let y = 12;
-
+    doc.setFont("helvetica","normal");
     doc.setFontSize(14);
-    doc.setFont("helvetica", "normal");
-    doc.text("Installer Daily Report", 10, y);
-    y += 9;
+    doc.text("Installer Daily Report", 10, y); y += 9;
 
     doc.setFontSize(11);
     doc.text(`Job: ${job}`, 10, y); y += 6;
@@ -619,13 +536,12 @@ async function exportZIP(){
           else y = pdfWriteWrapped(doc, `Comment required (not entered)`, 14, y, 186, 5);
         }
       }
-
       y += 2;
     });
 
     zip.file("Daily Report.pdf", doc.output("arraybuffer"));
 
-    // Photos (originals)
+    // Photos into folders (original files; no extra decoding)
     const folderMap = [
       ["pre", "Photos – Pre Install"],
       ["issue", "Photos – Issues"],
@@ -637,16 +553,20 @@ async function exportZIP(){
         const ext = (file.name && file.name.includes(".")) ? file.name.split(".").pop() : "jpg";
         const safeExt = (ext || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
         const num = String(i + 1).padStart(2, "0");
-        f.file(`${bucket}_${num}.${safeExt}`, file);
+        f.file(`${bucket}_${num}.${safeExt}`, file, { binary: true });
       });
     });
 
-    // JSON (optional but helpful)
     zip.file("Report Data.json", JSON.stringify(buildJSON(job, installer, rooms, date), null, 2));
 
-    const blob = await zip.generateAsync({ type: "blob" });
+    // CRITICAL: streamed generation so Android doesn’t OOM when photos are added
+    const blob = await zip.generateAsync({
+      type: "blob",
+      streamFiles: true,
+      compression: "STORE"  // fastest + most stable for big photos
+    });
 
-    // Android/PWA-safe download
+    // Download
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -659,11 +579,16 @@ async function exportZIP(){
       URL.revokeObjectURL(url);
     }, 800);
 
+    exportStatus.textContent = "ZIP exported.";
     alert("ZIP exported.");
 
   } catch (err){
     console.error(err);
+    exportStatus.textContent = "";
     alert("Export failed. Try again.");
+  } finally {
+    exportBtn.disabled = false;
+    setTimeout(()=>{ exportStatus.textContent = ""; }, 2500);
   }
 }
 </script>
