@@ -1,5 +1,5 @@
 // 🔁 CHANGE THIS VERSION NUMBER FOR EACH UPDATE
-const VERSION = "v3";
+const VERSION = "v4";
 
 const CACHE_NAME = `bench-checklist-${VERSION}`;
 
@@ -38,3 +38,4 @@ self.addEventListener("fetch", event => {
       .catch(() => caches.match(event.request))
   );
 });
+
