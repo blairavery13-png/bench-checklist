@@ -1,266 +1,874 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Bench Checklist</title>
+  <meta charset="utf-8">
+  <title>Bench Checklist</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-<link rel="manifest" href="manifest.json">
+  <!-- jsPDF for reliable in-app PDF generation (NOT Android print) -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-<style>
-:root {
-  --bg: #0b1120;
-  --panel: #111827;
-  --field: #020617;
-  --border: #4b5563;
-  --text: #e5e7eb;
-}
+  <style>
+    * { box-sizing: border-box; }
 
-* { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #0b1120;
+      color: #e5e7eb;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 18px;
+    }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-}
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+    }
 
-.wrapper {
-  max-width: 900px;
-  margin: auto;
-  padding: 16px;
-}
+    .app {
+      width: 100%;
+      max-width: 980px;
+      background: #111827;
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid #1f2937;
+    }
 
-h1 { margin: 0 0 12px; }
+    h1 { margin: 0 0 4px; }
+    .sub {
+      color: #9ca3af;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+      font-weight: 650;
+    }
 
-.section {
-  background: var(--panel);
-  border: 1px solid #1f2937;
-  border-radius: 14px;
-  padding: 16px;
-  margin-bottom: 20px;
-}
+    .topLine{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom: 12px;
+      flex-wrap:wrap;
+    }
 
-label {
-  display: block;
-  font-size: 0.95rem;
-  margin-bottom: 4px;
-}
+    .dotWrap{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-weight: 800;
+    }
 
-input[type="text"] {
-  width: 100%;
-  padding: 16px;
-  font-size: 1.05rem;
-  border-radius: 10px;
-  background: var(--field);
-  border: 2px solid var(--border);
-  color: var(--text);
-}
+    .dot{
+      width:14px;
+      height:14px;
+      border-radius:999px;
+      background:#ef4444; /* red default */
+      box-shadow: 0 0 0 4px rgba(239,68,68,.12);
+    }
+    .dot.green{
+      background:#22c55e;
+      box-shadow: 0 0 0 4px rgba(34,197,94,.12);
+    }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
-}
+    .section-title {
+      margin: 18px 0 10px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      border-bottom: 1px solid #1f2937;
+      padding-bottom: 6px;
+    }
 
-.controls {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
 
-button {
-  background: var(--field);
-  color: var(--text);
-  border: 2px solid var(--border);
-  border-radius: 999px;
-  padding: 10px 18px;
-  font-size: 0.95rem;
-  cursor: pointer;
-}
+    .field label {
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
 
-.question {
-  background: var(--field);
-  border: 1px solid #1f2937;
-  border-radius: 14px;
-  padding: 14px;
-  margin-bottom: 16px;
-}
+    .field input {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      margin-top: 4px;
+      border-radius: 10px;
+      background: #020617;
+      border: 1px solid #4b5563;
+      color: #e5e7eb;
+      font-weight: 750;
+    }
 
-.q-text {
-  font-size: 1.05rem;
-  margin-bottom: 12px;
-}
+    .field input.required-missing{
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 0 4px rgba(239,68,68,.12);
+    }
 
-.answers {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
 
-.answers input { display: none; }
+    .controls button {
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-weight: 850;
+    }
 
-.answers label {
-  padding: 14px;
-  text-align: center;
-  border-radius: 999px;
-  border: 2px solid var(--border);
-  cursor: pointer;
-}
+    .controls button.primary {
+      border-color: #2563eb;
+      background: #1d4ed8;
+    }
 
-.answers input:checked + label.yes { background:#16a34a; border-color:#16a34a; }
-.answers input:checked + label.no  { background:#b91c1c; border-color:#b91c1c; }
-.answers input:checked + label.na  { background:#374151; border-color:#9ca3af; }
+    .controls button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
 
-textarea {
-  width: 100%;
-  min-height: 70px;
-  padding: 10px;
-  background: var(--field);
-  border: 2px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  font-size: 0.95rem;
-  resize: vertical;
-}
+    .status {
+      color: #9ca3af;
+      font-size: 0.9rem;
+      font-weight: 800;
+      margin-left: auto;
+    }
 
-/* PRINT */
-@media print {
-  body { background:#fff; color:#000; }
-  .section, .question { background:#fff; border-color:#d1d5db; }
-  button { display:none; }
-}
-</style>
+    .status.bad { color: #fca5a5; }
+    .status.good { color: #86efac; }
+
+    .question {
+      background: #020617;
+      border: 1px solid #1f2937;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .question.required-missing{
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 0 4px rgba(239,68,68,.12);
+    }
+
+    .q-text {
+      margin-bottom: 12px;
+      font-size: 1.05rem;
+      font-weight: 850;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .answers.two {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .answers input[type="radio"] { display: none; }
+
+    .answers label {
+      padding: 14px 0;
+      text-align: center;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: #111827;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 900;
+    }
+
+    .answers input[type="radio"]:checked + label.yes {
+      background: #16a34a;
+      border-color: #16a34a;
+    }
+    .answers input[type="radio"]:checked + label.no {
+      background: #b91c1c;
+      border-color: #b91c1c;
+    }
+    .answers input[type="radio"]:checked + label.na {
+      background: #374151;
+      border-color: #9ca3af;
+    }
+
+    .notes {
+      margin-top: 12px;
+    }
+
+    .notes textarea {
+      width: 100%;
+      min-height: 70px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #020617;
+      border: 1px solid #4b5563;
+      color: #e5e7eb;
+      font-size: 0.95rem;
+      resize: vertical;
+      font-weight: 750;
+    }
+
+    /* Supervisor panel */
+    details.supervisor{
+      margin: 8px 0 14px;
+      border: 1px solid #1f2937;
+      border-radius: 14px;
+      background: #0b1220;
+      padding: 10px 12px;
+    }
+    details.supervisor summary{
+      cursor:pointer;
+      list-style:none;
+      font-weight: 900;
+    }
+    details.supervisor summary::-webkit-details-marker{display:none}
+    .trackerRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:10px;
+    }
+    .trackerRow input{
+      flex: 1 1 260px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #4b5563;
+      background:#020617;
+      color:#e5e7eb;
+      font-weight: 800;
+    }
+    .list{
+      margin-top:10px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .item{
+      border:1px solid #1f2937;
+      border-radius: 12px;
+      background:#020617;
+      padding:10px 12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    .item .left{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      font-weight: 850;
+    }
+    .pill{
+      display:inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 950;
+      font-size: .82rem;
+    }
+    .pill.draft{ background: rgba(239,68,68,.16); border:1px solid rgba(239,68,68,.35); color:#fecaca; }
+    .pill.done{ background: rgba(34,197,94,.16); border:1px solid rgba(34,197,94,.35); color:#bbf7d0; }
+    .item .right{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .mini{
+      padding:8px 12px !important;
+      font-size: .85rem !important;
+    }
+    .hint{
+      color:#9ca3af;
+      font-weight:800;
+      margin-top: 8px;
+      font-size: .9rem;
+    }
+
+    .finalHint{
+      color:#9ca3af;
+      font-weight:800;
+      margin-top: 8px;
+      font-size: .92rem;
+      line-height: 1.3;
+    }
+  </style>
 </head>
 
 <body>
-<div class="wrapper">
-
-<h1>Bench Checklist</h1>
-
-<div class="controls">
-  <button onclick="saveJSON()">Save JSON</button>
-  <button onclick="loadJSON()">Load JSON</button>
-  <button onclick="window.print()">Print / PDF</button>
-  <input type="file" id="fileInput" accept=".json" hidden>
-</div>
-
-<div class="section">
-  <div class="grid">
-    <div>
-      <label>Checklist filled by</label>
-      <input type="text" id="filledBy">
+  <div class="app">
+    <div class="topLine">
+      <div>
+        <h1>Bench Checklist</h1>
+        <div class="sub">If issues / missing items → Save Draft (JSON). If clean complete → Export Completion PDF.</div>
+      </div>
+      <div class="dotWrap">
+        <span id="dot" class="dot"></span>
+        <span id="dotText">Checking…</span>
+      </div>
     </div>
-    <div>
-      <label>Job number</label>
-      <input type="text" id="jobNumber">
+
+    <!-- Supervisor Tracker -->
+    <details class="supervisor">
+      <summary>Supervisor View (This Tablet)</summary>
+      <div class="trackerRow">
+        <input id="trackerSearch" placeholder="Search e.g. JB6521 or Laundry">
+        <button class="mini" type="button" onclick="refreshTracker()">Refresh</button>
+        <button class="mini" type="button" onclick="clearTracker()">Clear List</button>
+      </div>
+      <div class="hint">
+        This list shows drafts/completions created on <b>this tablet</b>. (Chrome can’t scan Google Drive folders automatically.)
+      </div>
+      <div id="trackerList" class="list"></div>
+    </details>
+
+    <!-- TOP CONTROLS -->
+    <div class="controls">
+      <button type="button" onclick="saveJSON()">Save Draft (JSON)</button>
+      <button type="button" onclick="loadJSON()">Load JSON</button>
+      <button id="exportBtnTop" type="button" class="primary" onclick="exportCompletionPDF()">Export Cabinetry Completion Sheet (PDF)</button>
+      <input type="file" id="fileInput" accept=".json,application/json" style="display:none">
+      <div id="status" class="status">Checking…</div>
     </div>
-    <div>
-      <label>Room</label>
-      <input type="text" id="room">
+
+    <!-- JOB DETAILS -->
+    <div class="section-title">Job Details</div>
+    <div class="field-row">
+      <div class="field">
+        <label for="filledBy">Checklist filled by</label>
+        <input id="filledBy" placeholder="Name (e.g. Blair)">
+      </div>
+      <div class="field">
+        <label for="jobNumber">Job number</label>
+        <input id="jobNumber" placeholder="JB8093">
+      </div>
+      <div class="field">
+        <label for="room">Room</label>
+        <input id="room" placeholder="Kitchen / Laundry / Vanity">
+      </div>
+    </div>
+
+    <div class="section-title">Checklist</div>
+
+    <!-- QUESTIONS (rendered by JS for future-proofing) -->
+    <div id="questions"></div>
+
+    <!-- FINAL CONFIRMATION (fixed position, always required) -->
+    <div class="section-title">Final Confirmation</div>
+
+    <div id="finalConfirmCard" class="question" data-final="true">
+      <div class="q-text">
+        Is this room complete and has all cabinetry & required hardware been supplied?
+      </div>
+
+      <div class="answers two">
+        <input type="radio" name="finalConfirm" id="finalYes" value="Yes">
+        <label for="finalYes" class="yes">🟢 YES — Room is complete</label>
+
+        <input type="radio" name="finalConfirm" id="finalNo" value="No">
+        <label for="finalNo" class="no">🔴 NO — Room is NOT complete</label>
+      </div>
+
+      <div class="finalHint">
+        <b>Accountability:</b> Select <b>YES</b> only if everything is complete, defect-free, and all required hardware is supplied.
+        If interrupted / missing items / defects → select <b>NO</b> and Save Draft.
+      </div>
+    </div>
+
+    <!-- BOTTOM CONTROLS -->
+    <div class="controls">
+      <button type="button" onclick="saveJSON()">Save Draft (JSON)</button>
+      <button type="button" onclick="loadJSON()">Load JSON</button>
+      <button id="exportBtnBottom" type="button" class="primary" onclick="exportCompletionPDF()">Export Cabinetry Completion Sheet (PDF)</button>
     </div>
   </div>
-</div>
 
-<div id="questions"></div>
+  <script>
+    // ========= FUTURE-PROOF QUESTION LIST =========
+    // Edit this list over time (add/remove/reword). The app auto-renders + auto-numbers.
+    const QUESTIONS = [
+      "Colour caps supplied?",
+      "Sizes checked (kicks / panels / bulkheads)?",
+      "LEDs supplied & tested?",
+      "Handles / sharknose rails installed?",
+      "Cleats supplied (bulkheads / overheads)?",
+      "Doors & drawers defect free?",
+      "Aluminium angle cut and supplied?",
+      "Cutlery tray installed (if required)?",
+      "Bins installed (if required)?",
+      "Finished ends correct and fitted?",
+      "Appliance panels supplied?",
+      "Shadowline / scribes installed?",
+      "Soft-close mechanisms working?",
+      "Special / custom hardware installed?"
+    ];
 
-<div class="controls">
-  <button onclick="saveJSON()">Save JSON</button>
-  <button onclick="loadJSON()">Load JSON</button>
-  <button onclick="window.print()">Print / PDF</button>
-</div>
+    const filledByInput  = document.getElementById('filledBy');
+    const jobNumberInput = document.getElementById('jobNumber');
+    const roomInput      = document.getElementById('room');
+    const fileInput      = document.getElementById('fileInput');
 
-</div>
+    const exportBtnTop = document.getElementById('exportBtnTop');
+    const exportBtnBottom = document.getElementById('exportBtnBottom');
+    const statusEl = document.getElementById('status');
+    const dot = document.getElementById('dot');
+    const dotText = document.getElementById('dotText');
 
-<script>
-const questionList = [
- "Colour caps supplied?",
- "Sizes checked (kicks / panels / bulkheads)?",
- "LEDs supplied & tested?",
- "Handles / sharknose rails installed?",
- "Cleats supplied?",
- "Doors & drawers defect free?",
- "Aluminium angle supplied?",
- "Cutlery tray installed?",
- "Bins installed?",
- "Finished ends correct?",
- "Appliance panels supplied?",
- "Shadowline / scribes installed?",
- "Soft close working?",
- "Special / custom hardware installed?"
-];
+    const trackerList = document.getElementById('trackerList');
+    const trackerSearch = document.getElementById('trackerSearch');
 
-const qWrap = document.getElementById("questions");
+    const questionsWrap = document.getElementById('questions');
+    const finalConfirmCard = document.getElementById('finalConfirmCard');
 
-questionList.forEach((text, i) => {
-  qWrap.insertAdjacentHTML("beforeend", `
-    <div class="question">
-      <div class="q-text">${i+1}. ${text}</div>
-      <div class="answers">
-        <input id="q${i}y" type="radio" name="q${i}" value="Yes">
-        <label class="yes" for="q${i}y">Yes</label>
+    const TODAY = new Date().toLocaleDateString();
+    const TRACKER_KEY = "benchTrackerV1";
 
-        <input id="q${i}n" type="radio" name="q${i}" value="No">
-        <label class="no" for="q${i}n">No</label>
+    const DRAFT_EMOJI = "🔴";
+    const DONE_EMOJI  = "🟢";
 
-        <input id="q${i}a" type="radio" name="q${i}" value="N/A">
-        <label class="na" for="q${i}a">N/A</label>
-      </div>
-      <textarea placeholder="Notes..."></textarea>
-    </div>
-  `);
-});
+    function renderQuestions(){
+      questionsWrap.innerHTML = "";
 
-function saveJSON() {
-  const data = {
-    filledBy: filledBy.value,
-    jobNumber: jobNumber.value,
-    room: room.value,
-    answers: []
-  };
+      QUESTIONS.forEach((text, idx) => {
+        const qDiv = document.createElement("div");
+        qDiv.className = "question";
+        qDiv.setAttribute("data-qtext", text);
 
-  document.querySelectorAll(".question").forEach(q => {
-    const sel = q.querySelector("input:checked");
-    data.answers.push({
-      answer: sel ? sel.value : "",
-      notes: q.querySelector("textarea").value
+        const n = idx + 1;
+        const name = "q" + idx;
+
+        qDiv.innerHTML = `
+          <div class="q-text">${n}. ${escapeHtml(text)}</div>
+          <div class="answers">
+            <input type="radio" name="${name}" id="${name}y" value="Yes"><label for="${name}y" class="yes">Yes</label>
+            <input type="radio" name="${name}" id="${name}n" value="No"><label for="${name}n" class="no">No</label>
+            <input type="radio" name="${name}" id="${name}a" value="N/A"><label for="${name}a" class="na">N/A</label>
+          </div>
+          <div class="notes"><textarea placeholder="Notes (leave blank if complete)"></textarea></div>
+        `;
+
+        questionsWrap.appendChild(qDiv);
+      });
+    }
+
+    // Basic HTML escape for safe rendering of question text
+    function escapeHtml(str){
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function safeName(str) {
+      return String(str || '')
+        .replace(/[\/\\:*?"<>|]/g, '')
+        .replace(/\s+/g, '_')
+        .replace(/[^a-z0-9_-]/gi, '')
+        .trim();
+    }
+
+    function getFinalConfirm(){
+      const selected = document.querySelector('input[name="finalConfirm"]:checked');
+      return selected ? selected.value : null;
+    }
+
+    function markFinalConfirmUI(){
+      const v = getFinalConfirm();
+      finalConfirmCard.classList.toggle("required-missing", !v);
+    }
+
+    function getQuestionsData() {
+      const data = [];
+      const qDivs = document.querySelectorAll('#questions .question');
+      qDivs.forEach((qDiv, idx) => {
+        const selected = qDiv.querySelector('input[type="radio"]:checked');
+        const notesEl  = qDiv.querySelector('textarea');
+        const qText = qDiv.getAttribute('data-qtext') || `Q${idx+1}`;
+
+        data.push({
+          number: idx + 1,
+          question: qText,
+          answer: selected ? selected.value : null,
+          notes: notesEl ? (notesEl.value || '') : ''
+        });
+      });
+      return data;
+    }
+
+    function getHeader(){
+      const filledBy = (filledByInput.value || '').trim();
+      const jobNumber = (jobNumberInput.value || '').trim();
+      const room = (roomInput.value || '').trim();
+      return { filledBy, jobNumber, room };
+    }
+
+    function missingFields(){
+      const { filledBy, jobNumber, room } = getHeader();
+      const missing = [];
+      if(!filledBy) missing.push("Checklist filled by");
+      if(!jobNumber) missing.push("Job number");
+      if(!room) missing.push("Room");
+      return missing;
+    }
+
+    function markRequiredUI(){
+      const { filledBy, jobNumber, room } = getHeader();
+      filledByInput.classList.toggle("required-missing", !filledBy);
+      jobNumberInput.classList.toggle("required-missing", !jobNumber);
+      roomInput.classList.toggle("required-missing", !room);
+      markFinalConfirmUI();
+    }
+
+    function evaluateCompletionState() {
+      markRequiredUI();
+
+      const missing = missingFields();
+      const answers = getQuestionsData();
+
+      const anyUnanswered = answers.some(a => !a.answer);
+      const anyNo = answers.some(a => (a.answer || '').toLowerCase() === 'no');
+      const anyNotes = answers.some(a => (a.notes || '').trim().length > 0);
+
+      const finalConfirm = getFinalConfirm();
+      const finalMissing = !finalConfirm;
+      const finalIsYes = finalConfirm === "Yes";
+
+      // Strict export gating:
+      // - must have job details
+      // - all questions answered
+      // - no "No" answers
+      // - no notes
+      // - final confirmation must be YES
+      const canExport = (missing.length === 0) && !anyUnanswered && !anyNo && !anyNotes && !finalMissing && finalIsYes;
+
+      exportBtnTop.disabled = !canExport;
+      exportBtnBottom.disabled = !canExport;
+
+      if (canExport) {
+        statusEl.className = "status good";
+        statusEl.textContent = "🟢 Ready to export completion sheet";
+        dot.classList.add("green");
+        dotText.textContent = "Complete";
+      } else {
+        statusEl.className = "status bad";
+
+        if (missing.length) statusEl.textContent = "Fill Job Details first";
+        else if (anyUnanswered) statusEl.textContent = "Answer all questions";
+        else if (finalMissing) statusEl.textContent = "Select Final Confirmation (YES/NO)";
+        else if (!finalIsYes) statusEl.textContent = "Room confirmed NOT complete — save JSON draft";
+        else if (anyNo || anyNotes) statusEl.textContent = "Issues detected — save JSON and finish later";
+        else statusEl.textContent = "Save JSON to continue later";
+
+        dot.classList.remove("green");
+        dotText.textContent = "Draft / Issues";
+      }
+    }
+
+    document.addEventListener('change', evaluateCompletionState);
+    document.addEventListener('input', evaluateCompletionState);
+
+    function requireHeadersOrAlert(actionLabel){
+      const missing = missingFields();
+      const finalConfirm = getFinalConfirm();
+
+      if(missing.length || !finalConfirm){
+        markRequiredUI();
+
+        let msg = `${actionLabel} blocked.\nPlease fill:\n`;
+        if(missing.length) msg += `- ${missing.join("\n- ")}\n`;
+        if(!finalConfirm) msg += `- Final Confirmation (YES/NO)\n`;
+
+        alert(msg.trim());
+        return false;
+      }
+      return true;
+    }
+
+    function loadTracker(){
+      try{
+        const raw = localStorage.getItem(TRACKER_KEY);
+        return raw ? JSON.parse(raw) : [];
+      }catch(_){ return []; }
+    }
+    function saveTracker(list){
+      try{ localStorage.setItem(TRACKER_KEY, JSON.stringify(list)); }catch(_){}
+    }
+
+    function upsertTracker(entry){
+      const list = loadTracker();
+      const key = entry.key;
+      const idx = list.findIndex(x => x.key === key);
+      if(idx >= 0) list[idx] = { ...list[idx], ...entry };
+      else list.unshift(entry);
+      saveTracker(list.slice(0, 200));
+      refreshTracker();
+    }
+
+    function refreshTracker(){
+      const q = (trackerSearch.value || "").toLowerCase().trim();
+      const list = loadTracker().filter(it => {
+        if(!q) return true;
+        return (
+          (it.jobNumber || "").toLowerCase().includes(q) ||
+          (it.room || "").toLowerCase().includes(q) ||
+          (it.filledBy || "").toLowerCase().includes(q)
+        );
+      });
+
+      trackerList.innerHTML = "";
+      if(list.length === 0){
+        const empty = document.createElement("div");
+        empty.className = "hint";
+        empty.textContent = "No entries yet on this tablet.";
+        trackerList.appendChild(empty);
+        return;
+      }
+
+      list.forEach(it => {
+        const item = document.createElement("div");
+        item.className = "item";
+        const pill = it.status === "COMPLETED"
+          ? `<span class="pill done">COMPLETED</span>`
+          : `<span class="pill draft">DRAFT</span>`;
+
+        item.innerHTML = `
+          <div class="left">
+            <div>${pill} <span style="margin-left:6px">${it.jobNumber || "-"} — ${it.room || "-"}</span></div>
+            <div style="color:#9ca3af; font-weight:800;">Filled by: ${it.filledBy || "-"} • Updated: ${it.updatedAt || "-"}</div>
+          </div>
+          <div class="right">
+            <button class="mini" type="button" onclick="alert('To reopen: tap Load JSON and select the file from Drive.')">Open</button>
+          </div>
+        `;
+        trackerList.appendChild(item);
+      });
+    }
+
+    function clearTracker(){
+      if(confirm("Clear this tablet’s supervisor list? (Does not delete any Drive files)")){
+        saveTracker([]);
+        refreshTracker();
+      }
+    }
+
+    trackerSearch.addEventListener("input", refreshTracker);
+
+    function saveJSON() {
+      if(!requireHeadersOrAlert("Save Draft")) return;
+
+      const { filledBy, jobNumber, room } = getHeader();
+      const answers = getQuestionsData();
+      const finalConfirm = getFinalConfirm();
+
+      const data = {
+        app: "Bench Checklist",
+        version: 2,
+        date: TODAY,
+        filledBy, jobNumber, room,
+        finalConfirm,
+        questions: QUESTIONS.slice(),
+        answers
+      };
+
+      const fileName =
+        `${DRAFT_EMOJI}_` +
+        safeName(jobNumber) + '_' +
+        safeName(room) + '_' +
+        safeName(filledBy) + '_DRAFT.json';
+
+      try {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        upsertTracker({
+          key: `${jobNumber}||${room}||${filledBy}`,
+          jobNumber, room, filledBy,
+          status: "DRAFT",
+          updatedAt: new Date().toLocaleString()
+        });
+
+      } catch (e) {
+        alert('Unable to save JSON on this device.');
+      }
+    }
+
+    function loadJSON() {
+      fileInput.value = '';
+      fileInput.click();
+    }
+
+    fileInput.addEventListener('change', function(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = JSON.parse(evt.target.result || '{}');
+
+          filledByInput.value  = data.filledBy  || '';
+          jobNumberInput.value = data.jobNumber || '';
+          roomInput.value      = data.room      || '';
+
+          // Questions: load by index (simple by design)
+          const qDivs = document.querySelectorAll('#questions .question');
+          qDivs.forEach(function(qDiv, index) {
+            const entry = (data.answers && data.answers[index]) || null;
+
+            qDiv.querySelectorAll('input[type="radio"]').forEach(function(radio) {
+              radio.checked = false;
+            });
+
+            if (entry && entry.answer) {
+              const match = qDiv.querySelector('input[type="radio"][value="' + entry.answer + '"]');
+              if (match) match.checked = true;
+            }
+
+            const notesEl = qDiv.querySelector('textarea');
+            if (notesEl) notesEl.value = (entry && entry.notes) ? entry.notes : '';
+          });
+
+          // Final confirmation
+          document.querySelectorAll('input[name="finalConfirm"]').forEach(r => r.checked = false);
+          if (data.finalConfirm) {
+            const fc = document.querySelector('input[name="finalConfirm"][value="' + data.finalConfirm + '"]');
+            if (fc) fc.checked = true;
+          }
+
+          const { filledBy, jobNumber, room } = getHeader();
+          if(filledBy && jobNumber && room){
+            upsertTracker({
+              key: `${jobNumber}||${room}||${filledBy}`,
+              jobNumber, room, filledBy,
+              status: "DRAFT",
+              updatedAt: new Date().toLocaleString()
+            });
+          }
+
+          evaluateCompletionState();
+        } catch (err) {
+          alert('Invalid JSON file.');
+        }
+      };
+      reader.readAsText(file);
     });
-  });
 
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `${jobNumber.value || "job"}_${room.value || "room"}.json`;
-  a.click();
-}
+    function exportCompletionPDF() {
+      evaluateCompletionState();
+      if (exportBtnTop.disabled) {
+        const missing = missingFields();
+        const finalConfirm = getFinalConfirm();
 
-function loadJSON() { fileInput.click(); }
+        if(missing.length || !finalConfirm){
+          let msg = "Export blocked.\nPlease fill:\n";
+          if(missing.length) msg += "- " + missing.join("\n- ") + "\n";
+          if(!finalConfirm) msg += "- Final Confirmation (YES/NO)\n";
+          alert(msg.trim());
+        } else {
+          alert("Export blocked.\nIssues detected or checklist incomplete.\nSave Draft (JSON) and complete later.");
+        }
+        return;
+      }
 
-fileInput.onchange = e => {
-  const r = new FileReader();
-  r.onload = () => {
-    const d = JSON.parse(r.result);
-    filledBy.value = d.filledBy || "";
-    jobNumber.value = d.jobNumber || "";
-    room.value = d.room || "";
-    document.querySelectorAll(".question").forEach((q, i) => {
-      if (!d.answers[i]) return;
-      const a = d.answers[i];
-      if (a.answer) q.querySelector(`input[value="${a.answer}"]`).checked = true;
-      q.querySelector("textarea").value = a.notes || "";
-    });
-  };
-  r.readAsText(e.target.files[0]);
-};
+      const { filledBy, jobNumber, room } = getHeader();
+      const answers = getQuestionsData();
 
-// register service worker
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
-</script>
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: "mm", format: "a4" });
 
+      let y = 14;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("Cabinetry Completion Sheet", 10, y); y += 10;
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Job Number: ${jobNumber}`, 10, y); y += 6;
+      doc.text(`Room: ${room}`, 10, y); y += 6;
+      doc.text(`Completed By: ${filledBy}`, 10, y); y += 6;
+      doc.text(`Date: ${TODAY}`, 10, y); y += 6;
+      doc.text(`Final Confirmation: YES (Room complete & hardware supplied)`, 10, y); y += 10;
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Checklist Summary", 10, y); y += 7;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+
+      function wrap(text, maxWidth) {
+        return doc.splitTextToSize(text, maxWidth);
+      }
+
+      answers.forEach((a) => {
+        const line = `${a.number}. ${a.question} — ${a.answer}`;
+        const lines = wrap(line, 190);
+        if (y > 275) { doc.addPage(); y = 14; }
+        doc.text(lines, 10, y);
+        y += (lines.length * 5) + 1;
+      });
+
+      if (y > 250) { doc.addPage(); y = 14; }
+      y += 6;
+      doc.setFont("helvetica", "bold");
+      doc.text("Sign-off", 10, y); y += 8;
+      doc.setFont("helvetica", "normal");
+      doc.text("Bench staff signature: ________________________________", 10, y); y += 10;
+      doc.text("Supervisor / checked by: _____________________________", 10, y); y += 10;
+
+      const fileName =
+        `${DONE_EMOJI}_` +
+        safeName(jobNumber) + '_' +
+        safeName(room) + '_' +
+        safeName(filledBy) + '_CABINETRY_COMPLETED.pdf';
+
+      try {
+        doc.save(fileName);
+
+        upsertTracker({
+          key: `${jobNumber}||${room}||${filledBy}`,
+          jobNumber, room, filledBy,
+          status: "COMPLETED",
+          updatedAt: new Date().toLocaleString()
+        });
+
+        alert("PDF created.\nTap the Chrome download bar → Save to Drive → Shared JB folder.");
+      } catch (e) {
+        alert("Unable to create PDF on this device. Try again.");
+      }
+    }
+
+    window.saveJSON = saveJSON;
+    window.loadJSON = loadJSON;
+    window.exportCompletionPDF = exportCompletionPDF;
+    window.refreshTracker = refreshTracker;
+    window.clearTracker = clearTracker;
+
+    // Initial render + state
+    renderQuestions();
+    evaluateCompletionState();
+    refreshTracker();
+  </script>
 </body>
 </html>
