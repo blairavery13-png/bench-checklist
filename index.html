@@ -28,8 +28,20 @@
     .section-title{margin:18px 0 10px;font-size:1.15rem;font-weight:900;border-bottom:1px solid #1f2937;padding-bottom:6px}
 
     .field-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:12px}
-    .field label{font-size:.9rem;font-weight:900}
-    .field input{width:100%;padding:12px;font-size:1rem;margin-top:4px;border-radius:10px;background:#020617;border:1px solid #4b5563;color:#e5e7eb;font-weight:800}
+    .field label{font-size:.95rem;font-weight:900}
+
+    /* RESTORED: larger, easier-to-read input text */
+    .field input{
+      width:100%;
+      padding:12px;
+      font-size:1.05rem;     /* restored */
+      margin-top:4px;
+      border-radius:10px;
+      background:#020617;
+      border:1px solid #4b5563;
+      color:#e5e7eb;
+      font-weight:800;
+    }
 
     .required-missing{border-color:#ef4444 !important;box-shadow:0 0 0 4px rgba(239,68,68,.12)}
 
@@ -48,13 +60,22 @@
     .answers input[type=radio]:checked + label.no{background:#b91c1c;border-color:#b91c1c}
     .answers input[type=radio]:checked + label.na{background:#374151;border-color:#9ca3af}
 
-    /* disabled look for labels when input disabled */
     .answers input[type=radio]:disabled + label{opacity:.45;cursor:not-allowed}
 
     .notes{margin-top:12px}
+
+    /* RESTORED: notes/comment text size */
     .notes textarea{
-      width:100%;min-height:70px;padding:10px;border-radius:10px;background:#020617;border:1px solid #4b5563;
-      color:#e5e7eb;font-size:.95rem;resize:vertical;font-weight:800
+      width:100%;
+      min-height:70px;
+      padding:10px;
+      border-radius:10px;
+      background:#020617;
+      border:1px solid #4b5563;
+      color:#e5e7eb;
+      font-size:1.00rem;     /* restored */
+      resize:vertical;
+      font-weight:800;
     }
 
     .bottomBar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
@@ -108,8 +129,6 @@
   </div>
 
 <script>
-  // ===== Checklist Questions (AUTO-NUMBERED) =====
-  // This is the original full list (restored).
   const QUESTIONS = [
     "Colour caps supplied?",
     "Sizes checked (kicks / panels / bulkheads)?",
@@ -199,24 +218,19 @@
       const notesWrap = qDiv.querySelector(".notes");
       const notesEl = qDiv.querySelector("textarea");
 
-      // Notes only appear on NO; and notes required for NO
       qDiv.addEventListener("change", (e) => {
         if(!e.target || e.target.type !== "radio") return;
-
         const val = String(e.target.value || "").toLowerCase();
 
         if(val === "no"){
           notesWrap.style.display = "";
-          // mark notes as required if empty
           notesEl.classList.toggle("required-missing", !notesEl.value.trim());
           setTimeout(()=>notesEl.focus(),0);
         }else{
-          // hide + clear notes to prevent contradictions
           notesEl.value = "";
           notesEl.classList.remove("required-missing");
           notesWrap.style.display = "none";
         }
-
         evaluateCompletionState();
       });
 
@@ -252,7 +266,6 @@
         notes = notesEl.value || "";
         notesEl.classList.toggle("required-missing", !notes.trim());
       }else{
-        // enforce no notes on Yes/N/A
         notesEl.value = "";
         notesEl.classList.remove("required-missing");
         notesWrap.style.display = "none";
@@ -276,7 +289,6 @@
     jobNumberInput.classList.toggle("required-missing", !jobNumber);
     roomInput.classList.toggle("required-missing", !room);
 
-    // Unanswered questions highlighted
     document.querySelectorAll("#questions .question").forEach(qDiv => {
       const selected = qDiv.querySelector('input[type="radio"]:checked');
       qDiv.classList.toggle("required-missing", !selected);
@@ -294,25 +306,19 @@
     const anyNoMissingNotes = answers.some(a =>
       String(a.answer||"").toLowerCase() === "no" && !(a.notes||"").trim()
     );
-
-    // any notes at all implies NOT clean (because notes only exist for NO)
     const anyNotes = answers.some(a => (a.notes||"").trim().length > 0);
 
     return { missingHeader, anyUnanswered, anyNo, anyNoMissingNotes, anyNotes };
   }
 
-  // HARD LOCK: Final YES only enabled when checklist is 100% clean.
   function setFinalYesEnabled(enabled){
     finalYesInput.disabled = !enabled;
-
-    // HARD force: if not eligible, Final must be NO (always).
     if(!enabled){
       finalYesInput.checked = false;
       finalNoInput.checked = true;
     }
   }
 
-  // Extra belt + braces: block label-tap weirdness on some devices
   finalYesInput.addEventListener("click", (e) => {
     if(finalYesInput.disabled){
       e.preventDefault();
@@ -326,8 +332,6 @@
 
     const s = computeChecklistState();
 
-    // Eligible to mark YES complete:
-    // header ok + all answered + no NO + no missing notes + no notes.
     const canSelectFinalYes =
       !s.missingHeader && !s.anyUnanswered && !s.anyNo && !s.anyNoMissingNotes && !s.anyNotes;
 
@@ -339,7 +343,6 @@
     exportBtn.disabled = !canExport;
     dot.classList.toggle("green", canExport);
 
-    // Visual cue if final not selected (optional highlight)
     finalConfirmCard.classList.toggle("required-missing", !getFinalConfirm());
   }
 
@@ -347,9 +350,6 @@
   document.addEventListener("input", evaluateCompletionState);
 
   function saveJSON(){
-    // Drafts do NOT require final confirmation. They DO require:
-    // - headers filled
-    // - if any NO -> note required
     const header = getHeader();
 
     const missing = [];
@@ -372,10 +372,10 @@
 
     const data = {
       app: "Bench Checklist",
-      version: 6,
+      version: 7,
       date: TODAY,
       ...header,
-      finalConfirm: getFinalConfirm(), // stored if chosen, not required
+      finalConfirm: getFinalConfirm(),
       questions: QUESTIONS.slice(),
       answers: getQuestionsData()
     };
@@ -413,7 +413,6 @@
         jobNumberInput.value = data.jobNumber || "";
         roomInput.value      = data.room      || "";
 
-        // Load answers by index (simple, deterministic)
         const qDivs = document.querySelectorAll("#questions .question");
         qDivs.forEach((qDiv, idx) => {
           const entry = (data.answers && data.answers[idx]) ? data.answers[idx] : null;
@@ -440,14 +439,12 @@
           }
         });
 
-        // Final confirm: load if present
         document.querySelectorAll('input[name="finalConfirm"]').forEach(r => r.checked = false);
         if(data.finalConfirm){
           const fc = document.querySelector('input[name="finalConfirm"][value="' + data.finalConfirm + '"]');
           if(fc) fc.checked = true;
         }
 
-        // safer default if nothing selected
         if(!getFinalConfirm()) finalNoInput.checked = true;
 
         evaluateCompletionState();
@@ -520,10 +517,7 @@
   window.exportCompletionPDF = exportCompletionPDF;
 
   renderQuestions();
-
-  // Safer default: Final = NO unless earned
   finalNoInput.checked = true;
-
   evaluateCompletionState();
 </script>
 </body>
