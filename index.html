@@ -45,6 +45,12 @@
     .answers input[type=radio]:checked + label.no{background:#b91c1c;border-color:#b91c1c}
     .answers input[type=radio]:checked + label.na{background:#374151;border-color:#9ca3af}
 
+    /* Disabled look for YES/NO labels when inputs disabled */
+    .answers input[type=radio]:disabled + label{
+      opacity:.45;
+      cursor:not-allowed;
+    }
+
     .notes{margin-top:12px}
     .notes textarea{width:100%;min-height:70px;padding:10px;border-radius:10px;background:#020617;border:1px solid #4b5563;color:#e5e7eb;font-size:.95rem;resize:vertical;font-weight:800}
 
@@ -125,10 +131,14 @@
   const jobNumberInput = document.getElementById("jobNumber");
   const roomInput      = document.getElementById("room");
   const fileInput      = document.getElementById("fileInput");
+
   const questionsWrap  = document.getElementById("questions");
   const exportBtn      = document.getElementById("exportBtn");
   const dot            = document.getElementById("dot");
+
   const finalConfirmCard = document.getElementById("finalConfirmCard");
+  const finalYesInput = document.getElementById("finalYes");
+  const finalNoInput  = document.getElementById("finalNo");
 
   function escapeHtml(str){
     return String(str||"")
@@ -192,11 +202,29 @@
 
         if(val === "no"){
           notesWrap.style.display = "";
+          // require a reason for NO (visual)
+          if(!notesEl.value.trim()) notesEl.classList.add("required-missing");
           setTimeout(()=>notesEl.focus(),0);
         }else{
           notesEl.value = "";
+          notesEl.classList.remove("required-missing");
           notesWrap.style.display = "none";
         }
+
+        evaluateCompletionState();
+      });
+
+      // live note validation when NO selected
+      const notesEl = qDiv.querySelector("textarea");
+      notesEl.addEventListener("input", () => {
+        const selected = qDiv.querySelector('input[type="radio"]:checked');
+        const ans = selected ? String(selected.value).toLowerCase() : "";
+        if(ans === "no"){
+          notesEl.classList.toggle("required-missing", !notesEl.value.trim());
+        }else{
+          notesEl.classList.remove("required-missing");
+        }
+        evaluateCompletionState();
       });
 
       questionsWrap.appendChild(qDiv);
@@ -219,8 +247,10 @@
       if(ans && String(ans).toLowerCase() === "no"){
         notes = notesEl.value || "";
         notesWrap.style.display = "";
+        notesEl.classList.toggle("required-missing", !notes.trim());
       }else{
         notesEl.value = "";
+        notesEl.classList.remove("required-missing");
         notesWrap.style.display = "none";
       }
 
@@ -242,9 +272,6 @@
     jobNumberInput.classList.toggle("required-missing", !jobNumber);
     roomInput.classList.toggle("required-missing", !room);
 
-    const final = getFinalConfirm();
-    finalConfirmCard.classList.toggle("required-missing", !final);
-
     // Unanswered questions highlighted
     document.querySelectorAll("#questions .question").forEach(qDiv => {
       const selected = qDiv.querySelector('input[type="radio"]:checked');
@@ -252,9 +279,7 @@
     });
   }
 
-  function evaluateCompletionState(){
-    markRequiredUI();
-
+  function computeChecklistState(){
     const header = getHeader();
     const missingHeader = (!header.filledBy || !header.jobNumber || !header.room);
 
@@ -263,10 +288,37 @@
     const anyNo = answers.some(a => String(a.answer||"").toLowerCase() === "no");
     const anyNotes = answers.some(a => (a.notes||"").trim().length > 0);
 
-    const final = getFinalConfirm();
+    // If NO exists, notes must exist for each NO (enforced for saving drafts)
+    const anyNoMissingNotes = answers.some(a =>
+      String(a.answer||"").toLowerCase() === "no" && !(a.notes||"").trim()
+    );
+
+    return { missingHeader, anyUnanswered, anyNo, anyNotes, anyNoMissingNotes };
+  }
+
+  function setFinalYesEnabled(enabled){
+    finalYesInput.disabled = !enabled;
+
+    // If final YES is selected but becomes invalid, force back to NO
+    const fc = getFinalConfirm();
+    if(!enabled && fc === "Yes"){
+      finalYesInput.checked = false;
+      finalNoInput.checked = true;
+    }
+  }
+
+  function evaluateCompletionState(){
+    markRequiredUI();
+
+    const { missingHeader, anyUnanswered, anyNo, anyNotes } = computeChecklistState();
+
+    // "Eligible to mark YES complete" means: header ok + all answered + no NO + no notes.
+    const canSelectFinalYes = !missingHeader && !anyUnanswered && !anyNo && !anyNotes;
+    setFinalYesEnabled(canSelectFinalYes);
 
     // Export ONLY when perfectly clean + final YES
-    const canExport = !missingHeader && !anyUnanswered && !anyNo && !anyNotes && (final === "Yes");
+    const final = getFinalConfirm();
+    const canExport = canSelectFinalYes && (final === "Yes");
 
     exportBtn.disabled = !canExport;
     dot.classList.toggle("green", canExport);
@@ -275,34 +327,34 @@
   document.addEventListener("change", evaluateCompletionState);
   document.addEventListener("input", evaluateCompletionState);
 
-  function requireHeadersOrAlert(actionLabel){
-    const {filledBy, jobNumber, room} = getHeader();
-    const final = getFinalConfirm();
-
+  function saveJSON(){
+    // Drafts do NOT require final confirmation.
+    const header = getHeader();
     const missing = [];
-    if(!filledBy) missing.push("Checklist filled by");
-    if(!jobNumber) missing.push("Job number");
-    if(!room) missing.push("Room");
-    if(!final) missing.push("Final Confirmation (YES/NO)");
+    if(!header.filledBy) missing.push("Checklist filled by");
+    if(!header.jobNumber) missing.push("Job number");
+    if(!header.room) missing.push("Room");
+
+    // If there are NO answers, notes are mandatory for each NO.
+    const { anyNoMissingNotes } = computeChecklistState();
 
     if(missing.length){
       evaluateCompletionState();
-      alert(`${actionLabel} blocked.\n\nPlease fill:\n- ` + missing.join("\n- "));
-      return false;
+      alert("Save Draft blocked.\n\nPlease fill:\n- " + missing.join("\n- "));
+      return;
     }
-    return true;
-  }
+    if(anyNoMissingNotes){
+      evaluateCompletionState();
+      alert("Save Draft blocked.\n\nAny NO must have a note explaining why.");
+      return;
+    }
 
-  function saveJSON(){
-    if(!requireHeadersOrAlert("Save Draft")) return;
-
-    const header = getHeader();
     const data = {
       app: "Bench Checklist",
-      version: 4,
+      version: 5,
       date: TODAY,
       ...header,
-      finalConfirm: getFinalConfirm(),
+      finalConfirm: getFinalConfirm(),   // stored if chosen, but not required
       questions: QUESTIONS.slice(),
       answers: getQuestionsData()
     };
@@ -359,13 +411,15 @@
           if(ans && String(ans).toLowerCase() === "no"){
             notesWrap.style.display = "";
             notesEl.value = (entry && entry.notes) ? entry.notes : "";
+            notesEl.classList.toggle("required-missing", !notesEl.value.trim());
           }else{
             notesEl.value = "";
+            notesEl.classList.remove("required-missing");
             notesWrap.style.display = "none";
           }
         });
 
-        // Final confirm
+        // Final confirm (load if present)
         document.querySelectorAll('input[name="finalConfirm"]').forEach(r => r.checked = false);
         if(data.finalConfirm){
           const fc = document.querySelector('input[name="finalConfirm"][value="' + data.finalConfirm + '"]');
@@ -383,7 +437,7 @@
   function exportCompletionPDF(){
     evaluateCompletionState();
     if(exportBtn.disabled){
-      alert("Export blocked.\nFinish the checklist or save draft.");
+      alert("Not ready — check red highlights.");
       return;
     }
 
@@ -442,6 +496,10 @@
   window.exportCompletionPDF = exportCompletionPDF;
 
   renderQuestions();
+
+  // Default final to NO to prevent “blank final” confusion (and it's safer).
+  finalNoInput.checked = true;
+
   evaluateCompletionState();
 </script>
 </body>
